@@ -5,7 +5,7 @@
 > - 编号规则：`T<阶段>.<序号>`，阶段内顺序即建议实施顺序。
 > - 进度规则：每完成一项就勾选；完成协议能力相关的任务后，同步更新 README（中英两份）的协议覆盖表状态与 Roadmap 复选框。
 > - 依赖关系：T1 → T2 → … → T8 依次依赖；**T9.1（本地 ejabberd 环境）建议提前到 T2 开始前完成**，因为从流协商起就需要真实服务器联调。JID、XML、SCRAM 等纯计算任务不依赖服务器，可随时穿插进行。
-> - 截至 2026-10-01：T1.1、T1.2 已完成。
+> - 截至 2026-10-01：T1.1 至 T1.3 已完成。
 
 ## T1 设计与基础
 
@@ -13,7 +13,7 @@
 
 - [x] T1.1 API 编程模型已定（2026-10-01）：采用基于 moonbitlang/async 的 async fn（在 moon.mod 中锁版本），库内部写成顺序协议状态机；两份 README 示意性示例的刷新挪到 T7.2（API 落地时）进行
 - [x] T1.2 包结构已创建：jid / xml / sasl / core，各自拥有一个公开 suberror 错误类型（JidError、XmlError、SaslError、XmppError）；根包保持 facade 角色，后续用 `pub using` 再导出
-- [ ] T1.3 JID 解析：`localpart@domainpart/resourcepart` 拆分与合法性校验（RFC 8264）
+- [x] T1.3 JID 解析：`localpart@domainpart/resourcepart` 拆分与合法性校验（RFC 8264）——jid 包的 `Jid::parse`，含禁用字符与每段 1023 字节上限校验
 - [ ] T1.4 JID 规范化：case map 与 width map 规则（RFC 8264）
 - [ ] T1.5 XML 解析基于 moonbit-community/XMLParser@0.2.6（选型已定，版本已在 moon.mod 锁定；该库为 DOM 风格，无 SAX/增量接口）。剩余工作：自写薄分帧层把字节流切成完整的顶层 stanza（流根元素永不闭合），逐片交给该库解析；序列化用 `XMLElement::to_string` 保证转义正确
 

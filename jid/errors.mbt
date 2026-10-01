@@ -1,6 +1,7 @@
 ///|
 pub(all) suberror JidError {
   MissingDomainpart
+  EmptyPart(part~ : String)
   InvalidChar(part~ : String, char~ : Char)
   TooLong(part~ : String)
 } derive(Eq, Debug)
