@@ -13,23 +13,34 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: no tasks started yet.
+> - As of 2026-10-01: T1 completed (T1.1 through T1.5).
 
 ## T1 Design and Foundations
 
 Goal: settle the programming model and lay the JID and XML groundwork.
 
-- [ ] T1.1 Decide the API programming model (blocking sync vs async/await);
-      once decided, replace the illustrative example in both READMEs
-- [ ] T1.2 Design the package layout and error types (expected split:
-      jid / xml / sasl / core)
-- [ ] T1.3 JID parsing: splitting and validating
-      `localpart@domainpart/resourcepart` (RFC 8264)
-- [ ] T1.4 JID normalization: case map and width map rules (RFC 8264)
-- [ ] T1.5 XML parsing and serialization: check mooncakes for a suitable XML
-      library first; if none fits, write a small stream-oriented parser that
-      supports escaping, attributes, and nesting, and can split the stream
-      into stanzas
+- [x] T1.1 API programming model decided (2026-10-01): async functions built
+      on moonbitlang/async (version pinned in moon.mod), with the library
+      written as a sequential protocol state machine. Refreshing the
+      illustrative README example is deferred to T7.2, when the API lands
+- [x] T1.2 Package layout created: jid / xml / sasl / core, each owning one
+      public suberror type (JidError, XmlError, SaslError, XmppError);
+      the root package stays the facade and will re-export them via
+      `pub using`
+- [x] T1.3 JID parsing: splitting and validating
+      `localpart@domainpart/resourcepart` (RFC 8264) — `Jid::parse` in the
+      jid package checks forbidden characters and the 1023-byte-per-part
+      limit
+- [x] T1.4 JID normalization: width map, case map, and NFKC (RFC 8264) —
+      case mapping and NFKC come from moonbit-community/unicode@0.5.2
+      (pinned); the width map is local; resourcepart is width-mapped only,
+      preserving case
+- [x] T1.5 XML layer done: `Framer` splits the stream into Root / Stanza /
+      StreamEnd frames (tag-stack matching, quote/comment/CDATA aware,
+      reusable after StreamEnd for stream restarts); `parse_element` feeds
+      complete stanzas to XMLParser@0.2.6; serialization uses `escape_text`
+      / `escape_attr`. The parser emits empty text nodes around child
+      elements, so walk children by name rather than by index
 
 ## T2 XML Streams (RFC 6120 §4)
 
@@ -53,13 +64,16 @@ handle stream-level errors.
 Goal: upgrade the plaintext stream to TLS; algorithms and certificate
 validation follow RFC 7590.
 
-- [ ] T3.1 TLS implementation choice: survey usable TLS options for the
-      native target (e.g. openssl / mbedTLS via C bindings)
+- [ ] T3.1 TLS choice made: moonbitlang/async/tls (OpenSSL-backed).
+      Remaining work: pin the version, and verify that `Tls::client_from_pair`
+      can upgrade the already-established TCP connection, as STARTTLS
+      requires
 - [ ] T3.2 `<starttls/>` negotiation: honor the `required` flag, send the
       request, handle `proceeded` / `failure`, restart the stream after the
       TLS handshake
-- [ ] T3.3 Server certificate validation: hostname matching and expiry;
-      disallow plaintext mechanisms on unencrypted streams (pairs with T4.2)
+- [ ] T3.3 Server certificate validation: hostname matching and expiry via
+      Tls's `host~` + `TrustedRoot::SystemRoot`; disallow plaintext
+      mechanisms on unencrypted streams (pairs with T4.2)
 
 ## T4 SASL (RFC 6120 §6, framework in RFC 4422)
 
@@ -75,7 +89,9 @@ negotiation framework.
       primitives; validate with the RFC 5802 test vectors)
 - [ ] T4.4 SCRAM-SHA-256 (RFC 7677): reuse the T4.3 framework with a
       different hash
-- [ ] T4.5 (optional stretch) SCRAM channel binding (`-PLUS` variants)
+- [ ] T4.5 (optional stretch) SCRAM channel binding (`-PLUS` variants) —
+      async/tls already exposes tls-unique and tls-server-end-point bindings
+      (RFC 5929), so the primitives exist
 
 ## T5 Resource Binding (RFC 6120 §7)
 

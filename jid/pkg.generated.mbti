@@ -1,0 +1,36 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "daqing/moon-xmpp/jid"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+pub(all) suberror JidError {
+  MissingDomainpart
+  EmptyPart(part~ : String)
+  InvalidChar(part~ : String, char~ : Char)
+  TooLong(part~ : String)
+} derive(Eq, @debug.Debug)
+pub fn JidError::equal(Self, Self) -> Bool
+pub fn JidError::not_equal(Self, Self) -> Bool
+pub fn JidError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+pub struct Jid {
+  localpart : String?
+  domainpart : String
+  resourcepart : String?
+} derive(Eq, @debug.Debug)
+pub fn Jid::bare(Self) -> Self
+pub fn Jid::equal(Self, Self) -> Bool
+pub fn Jid::not_equal(Self, Self) -> Bool
+pub fn Jid::parse(String) -> Self raise JidError
+pub fn Jid::to_repr(Self) -> @debug.Repr
+pub fn Jid::to_string(Self) -> String
+
+// Type aliases
+
+// Traits

@@ -50,15 +50,18 @@ import {
 
 ## 用法
 
-> API 尚未定型。以下示例是示意性的，展示一次会话的预期形态；API 落地后会同步更新。
+> API 尚未定型，但方向已定：基于 [moonbitlang/async](https://mooncakes.io/docs/moonbitlang/async) 的 async fn。MoonBit 没有 `await` 关键字——async 调用与普通调用写法一致，错误隐式传播。以下示例是示意性的，展示一次会话的预期形态；API 落地后会同步更新。
 
-```moonbit
-let conn = @xmpp.connect(host = "example.com", port = 5222)?
-conn.starttls()?
-conn.authenticate(jid = "alice@example.com", password = "secret")?
-conn.bind_resource("laptop")?
-conn.send_initial_presence()?
-conn.send_chat(to = "bob@example.com", body = "Hello from MoonBit!")?
+```moonbit nocheck
+///|
+async fn main {
+  let conn = @xmpp.connect(host="example.com", port=5222)
+  conn.starttls()
+  conn.authenticate(jid="alice@example.com", password="secret")
+  conn.bind_resource("laptop")
+  conn.send_initial_presence()
+  conn.send_chat(to="bob@example.com", body="Hello from MoonBit!")
+}
 ```
 
 ## 演示
