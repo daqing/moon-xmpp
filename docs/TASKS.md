@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1.1 through T1.3 completed.
+> - As of 2026-10-01: T1.1 through T1.4 completed.
 
 ## T1 Design and Foundations
 
@@ -31,7 +31,10 @@ Goal: settle the programming model and lay the JID and XML groundwork.
       `localpart@domainpart/resourcepart` (RFC 8264) — `Jid::parse` in the
       jid package checks forbidden characters and the 1023-byte-per-part
       limit
-- [ ] T1.4 JID normalization: case map and width map rules (RFC 8264)
+- [x] T1.4 JID normalization: width map, case map, and NFKC (RFC 8264) —
+      case mapping and NFKC come from moonbit-community/unicode@0.5.2
+      (pinned); the width map is local; resourcepart is width-mapped only,
+      preserving case
 - [ ] T1.5 XML parsing on moonbit-community/XMLParser@0.2.6 (choice made,
       version pinned in moon.mod; the library is DOM-style, no SAX API).
       Remaining work: a thin framing layer that splits the socket stream

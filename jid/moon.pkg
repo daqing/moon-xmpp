@@ -1,4 +1,6 @@
 import {
+  "moonbit-community/unicode",
+  "moonbit-community/unicode/normalization",
   "moonbitlang/core/debug",
   "moonbitlang/core/encoding/utf8",
 }

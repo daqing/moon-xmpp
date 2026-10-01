@@ -28,7 +28,7 @@ pub fn Jid::parse(s : String) -> Jid raise JidError {
     }
   }
   let prefix : String = if slash < 0 { s } else { s[0:slash].to_owned() }
-  let resourcepart : String? = if slash < 0 {
+  let resourcepart_raw : String? = if slash < 0 {
     None
   } else {
     Some(s[slash + 1:].to_owned())
@@ -36,13 +36,20 @@ pub fn Jid::parse(s : String) -> Jid raise JidError {
   let localpart : String? = if at < 0 {
     None
   } else {
-    Some(prefix[0:at].to_owned())
+    Some(@normalization.nfkc(case_map(width_map(prefix[0:at].to_owned()))))
   }
-  let domainpart : String = if at < 0 {
+  let domainpart_raw : String = if at < 0 {
     prefix
   } else {
     prefix[at + 1:].to_owned()
   }
+  let resourcepart : String? = match resourcepart_raw {
+    Some(r) => Some(@normalization.nfkc(width_map(r)))
+    None => None
+  }
+  let domainpart : String = @normalization.nfkc(
+    case_map(width_map(domainpart_raw)),
+  )
   if s is "" || domainpart is "" {
     raise JidError::MissingDomainpart
   }
