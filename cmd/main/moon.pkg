@@ -1,0 +1,5 @@
+// import {
+//   "daqing/moon-xmpp" @lib,
+// }
+
+pkgtype(kind: "executable")
