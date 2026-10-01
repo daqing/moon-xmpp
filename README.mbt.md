@@ -62,16 +62,22 @@ import {
 
 ## Usage
 
-> The API is still taking shape. The example below is illustrative and shows
-> the intended shape of a session; it will be updated as the API lands.
+> The API is still taking shape, but the direction is decided: async
+> functions built on
+> [moonbitlang/async](https://mooncakes.io/docs/moonbitlang/async). MoonBit
+> has no `await` keyword — async calls look like ordinary calls, and errors
+> propagate implicitly. The example below is illustrative; it will be updated
+> as the API lands.
 
 ```moonbit
-let conn = @xmpp.connect(host = "example.com", port = 5222)?
-conn.starttls()?
-conn.authenticate(jid = "alice@example.com", password = "secret")?
-conn.bind_resource("laptop")?
-conn.send_initial_presence()?
-conn.send_chat(to = "bob@example.com", body = "Hello from MoonBit!")?
+async fn main {
+  let conn = @xmpp.connect(host = "example.com", port = 5222)
+  conn.starttls()
+  conn.authenticate(jid = "alice@example.com", password = "secret")
+  conn.bind_resource("laptop")
+  conn.send_initial_presence()
+  conn.send_chat(to = "bob@example.com", body = "Hello from MoonBit!")
+}
 ```
 
 ## Demo
