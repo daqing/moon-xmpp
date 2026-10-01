@@ -5,7 +5,7 @@
 > - 编号规则：`T<阶段>.<序号>`，阶段内顺序即建议实施顺序。
 > - 进度规则：每完成一项就勾选；完成协议能力相关的任务后，同步更新 README（中英两份）的协议覆盖表状态与 Roadmap 复选框。
 > - 依赖关系：T1 → T2 → … → T8 依次依赖；**T9.1（本地 ejabberd 环境）建议提前到 T2 开始前完成**，因为从流协商起就需要真实服务器联调。JID、XML、SCRAM 等纯计算任务不依赖服务器，可随时穿插进行。
-> - 截至 2026-10-01：T1.1 至 T1.4 已完成。
+> - 截至 2026-10-01：T1 已完成（T1.1 至 T1.5）。
 
 ## T1 设计与基础
 
@@ -15,7 +15,7 @@
 - [x] T1.2 包结构已创建：jid / xml / sasl / core，各自拥有一个公开 suberror 错误类型（JidError、XmlError、SaslError、XmppError）；根包保持 facade 角色，后续用 `pub using` 再导出
 - [x] T1.3 JID 解析：`localpart@domainpart/resourcepart` 拆分与合法性校验（RFC 8264）——jid 包的 `Jid::parse`，含禁用字符与每段 1023 字节上限校验
 - [x] T1.4 JID 规范化：width map、case map 与 NFKC（RFC 8264）——case map 与 NFKC 来自 moonbit-community/unicode@0.5.2（已锁版本），width map 自实现；resourcepart 只做 width map、保留大小写
-- [ ] T1.5 XML 解析基于 moonbit-community/XMLParser@0.2.6（选型已定，版本已在 moon.mod 锁定；该库为 DOM 风格，无 SAX/增量接口）。剩余工作：自写薄分帧层把字节流切成完整的顶层 stanza（流根元素永不闭合），逐片交给该库解析；序列化用 `XMLElement::to_string` 保证转义正确
+- [x] T1.5 XML 层完成：`Framer` 把字节流切成 Root / Stanza / StreamEnd 帧（标签栈匹配，感知引号/注释/CDATA，StreamEnd 后可复用以支持流重启）；`parse_element` 把完整 stanza 交给 XMLParser@0.2.6 解析；序列化用 `escape_text` / `escape_attr`。注意：解析器会在子元素前后产出空文本节点，遍历 children 要按名字找而不是按下标
 
 ## T2 XML 流（RFC 6120 §4）
 

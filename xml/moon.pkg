@@ -1,3 +1,8 @@
 import {
+  "moonbit-community/XMLParser",
   "moonbitlang/core/debug",
 }
+
+import {
+  "moonbit-community/XMLParser",
+} for "test"

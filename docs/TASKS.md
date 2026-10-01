@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1.1 through T1.4 completed.
+> - As of 2026-10-01: T1 completed (T1.1 through T1.5).
 
 ## T1 Design and Foundations
 
@@ -35,12 +35,12 @@ Goal: settle the programming model and lay the JID and XML groundwork.
       case mapping and NFKC come from moonbit-community/unicode@0.5.2
       (pinned); the width map is local; resourcepart is width-mapped only,
       preserving case
-- [ ] T1.5 XML parsing on moonbit-community/XMLParser@0.2.6 (choice made,
-      version pinned in moon.mod; the library is DOM-style, no SAX API).
-      Remaining work: a thin framing layer that splits the socket stream
-      into complete top-level stanzas (the stream root never closes), then
-      parse each stanza with the library; serialization via
-      `XMLElement::to_string` for correct escaping
+- [x] T1.5 XML layer done: `Framer` splits the stream into Root / Stanza /
+      StreamEnd frames (tag-stack matching, quote/comment/CDATA aware,
+      reusable after StreamEnd for stream restarts); `parse_element` feeds
+      complete stanzas to XMLParser@0.2.6; serialization uses `escape_text`
+      / `escape_attr`. The parser emits empty text nodes around child
+      elements, so walk children by name rather than by index
 
 ## T2 XML Streams (RFC 6120 §4)
 
