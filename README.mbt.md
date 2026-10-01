@@ -69,14 +69,15 @@ import {
 > propagate implicitly. The example below is illustrative; it will be updated
 > as the API lands.
 
-```moonbit
+```moonbit nocheck
+///|
 async fn main {
-  let conn = @xmpp.connect(host = "example.com", port = 5222)
+  let conn = @xmpp.connect(host="example.com", port=5222)
   conn.starttls()
-  conn.authenticate(jid = "alice@example.com", password = "secret")
+  conn.authenticate(jid="alice@example.com", password="secret")
   conn.bind_resource("laptop")
   conn.send_initial_presence()
-  conn.send_chat(to = "bob@example.com", body = "Hello from MoonBit!")
+  conn.send_chat(to="bob@example.com", body="Hello from MoonBit!")
 }
 ```
 

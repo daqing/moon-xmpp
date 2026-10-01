@@ -24,3 +24,7 @@ keywords = [ "xmpp" ]
 preferred_target = "native"
 
 description = "An XMPP client library for MoonBit"
+
+import {
+  "moonbit-community/XMLParser@0.2.6",
+}

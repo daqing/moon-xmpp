@@ -1,0 +1,24 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "daqing/moon-xmpp/sasl"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+pub(all) suberror SaslError {
+  InvalidState(detail~ : String)
+  InvalidChallenge(detail~ : String)
+  AuthenticationFailed(detail~ : String)
+} derive(Eq, @debug.Debug)
+pub fn SaslError::equal(Self, Self) -> Bool
+pub fn SaslError::not_equal(Self, Self) -> Bool
+pub fn SaslError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+
+// Type aliases
+
+// Traits

@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1.1 completed.
+> - As of 2026-10-01: T1.1 and T1.2 completed.
 
 ## T1 Design and Foundations
 
@@ -23,15 +23,19 @@ Goal: settle the programming model and lay the JID and XML groundwork.
       on moonbitlang/async (version pinned in moon.mod), with the library
       written as a sequential protocol state machine. Refreshing the
       illustrative README example is deferred to T7.2, when the API lands
-- [ ] T1.2 Design the package layout and error types (expected split:
-      jid / xml / sasl / core)
+- [x] T1.2 Package layout created: jid / xml / sasl / core, each owning one
+      public suberror type (JidError, XmlError, SaslError, XmppError);
+      the root package stays the facade and will re-export them via
+      `pub using`
 - [ ] T1.3 JID parsing: splitting and validating
       `localpart@domainpart/resourcepart` (RFC 8264)
 - [ ] T1.4 JID normalization: case map and width map rules (RFC 8264)
-- [ ] T1.5 XML parsing and serialization: check mooncakes for a suitable XML
-      library first; if none fits, write a small stream-oriented parser that
-      supports escaping, attributes, and nesting, and can split the stream
-      into stanzas
+- [ ] T1.5 XML parsing on moonbit-community/XMLParser@0.2.6 (choice made,
+      version pinned in moon.mod; the library is DOM-style, no SAX API).
+      Remaining work: a thin framing layer that splits the socket stream
+      into complete top-level stanzas (the stream root never closes), then
+      parse each stanza with the library; serialization via
+      `XMLElement::to_string` for correct escaping
 
 ## T2 XML Streams (RFC 6120 §4)
 
