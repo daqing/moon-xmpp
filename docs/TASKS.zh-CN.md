@@ -5,7 +5,7 @@
 > - 编号规则：`T<阶段>.<序号>`，阶段内顺序即建议实施顺序。
 > - 进度规则：每完成一项就勾选；完成协议能力相关的任务后，同步更新 README（中英两份）的协议覆盖表状态与 Roadmap 复选框。
 > - 依赖关系：T1 → T2 → … → T8 依次依赖；**T9.1（本地 ejabberd 环境）建议提前到 T2 开始前完成**，因为从流协商起就需要真实服务器联调。JID、XML、SCRAM 等纯计算任务不依赖服务器，可随时穿插进行。
-> - 截至 2026-10-01：T1 已完成，T2.1 已完成。
+> - 截至 2026-10-01：T1 已完成，T2.1 至 T2.2 已完成。
 
 ## T1 设计与基础
 
@@ -22,7 +22,7 @@
 目标：能与服务器完成流握手，解析 features，正确处理流级错误。
 
 - [x] T2.1 TCP 连接层：建立连接、读写循环、关闭（native 目标）——锁定 moonbitlang/async@0.22.4；`ByteStream` 从 socket 原始字节中解码完整 UTF-8 序列（跨 chunk 安全）并喂给分帧器；回环测试覆盖 connect/send/close
-- [ ] T2.2 stream header 往返：发送客户端头（`to`、`version` 等），解析服务端响应头；支持流重启（TLS 与 SASL 之后各一次）
+- [x] T2.2 stream header 往返：发送客户端头（`to`、`version` 等），解析服务端响应头；支持流重启（TLS 与 SASL 之后各一次）——`Connection::open_stream` / `restart_stream`；响应头校验流命名空间、version 1.0 与 id；同一次 socket 读取产出的多帧会缓冲，不会在读取间丢失
 - [ ] T2.3 stream features 解析：至少识别 `starttls`、`mechanisms`、`bind` 三类
 - [ ] T2.4 stream error 处理（RFC 6120 §4.9）：解析并向上层报告，断开连接
 - [ ] T2.5 stanza error 解析（RFC 6120 §8.3）：`<error/>` 子元素的 type 与 condition

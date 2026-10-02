@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 completed, T2.1 completed.
+> - As of 2026-10-01: T1 completed, T2.1 through T2.2 completed.
 
 ## T1 Design and Foundations
 
@@ -51,9 +51,12 @@ handle stream-level errors.
       target) — moonbitlang/async@0.22.4 pinned; `ByteStream` decodes
       complete UTF-8 prefixes from raw socket reads (chunk-boundary safe)
       and feeds the framer; loopback tests cover connect/send/close
-- [ ] T2.2 Stream header round-trip: send the client header (`to`, `version`,
+- [x] T2.2 Stream header round-trip: send the client header (`to`, `version`,
       etc.), parse the server response header; support stream restarts (one
-      after TLS, one after SASL)
+      after TLS, one after SASL) — `Connection::open_stream` /
+      `restart_stream`; the response header is validated (stream namespace,
+      version 1.0, id); frames from one socket read are buffered so none are
+      dropped between reads
 - [ ] T2.3 Stream features parsing: recognize at least `starttls`,
       `mechanisms`, and `bind`
 - [ ] T2.4 Stream error handling (RFC 6120 §4.9): parse, report upstream,

@@ -1,5 +1,6 @@
 import {
   "daqing/moon-xmpp/xml",
+  "moonbit-community/XMLParser",
   "moonbitlang/async/socket",
   "moonbitlang/core/debug",
   "moonbitlang/core/encoding/utf8",
@@ -8,4 +9,9 @@ import {
 import {
   "moonbitlang/async",
   "moonbitlang/async/socket",
+  "moonbitlang/core/encoding/utf8",
 } for "test"
+
+import {
+  "moonbitlang/async",
+} for "wbtest"
