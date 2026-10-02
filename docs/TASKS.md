@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 through T6 completed; T7.1 through T7.3 completed.
+> - As of 2026-10-01: T1 through T7 completed; T8.1 through T8.3 completed.
 
 ## T1 Design and Foundations
 
@@ -173,12 +173,15 @@ Goal: two-way chat — the core of the acceptance scenario.
 
 Goal: reproduce the acceptance scenario with one command.
 
-- [ ] T8.1 Argument parsing: `--jid` / `--password` / `--to` / `--body`,
-      plus optional `--host` / `--port` overrides
-- [ ] T8.2 Wire up the full chain: connect → starttls → sasl → bind →
-      presence → send
-- [ ] T8.3 Receive loop: print incoming messages, proving the reverse path
-      works
+- [x] T8.1 Argument parsing: `--jid` / `--password` / `--to` / `--body`,
+      plus optional `--host` / `--port` / `--resource` overrides, in both
+      `--name value` and `--name=value` forms with a typed CliError
+- [x] T8.2 Wire up the full chain: connect → starttls → sasl → bind →
+      presence → send — `run` covered end-to-end by a TLS loopback test
+      that walks the whole session and inspects the sent message
+- [x] T8.3 Receive loop: prints chat messages and presence broadcasts
+      until the stream ends; covered by the TLS loopback test with a
+      collecting printer
 
 ## T9 Testing and Acceptance
 

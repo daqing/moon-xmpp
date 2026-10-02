@@ -23,7 +23,7 @@ pub async fn Connection::send_chat(
 /// A received chat message. `body` is None for stanzas that carry no
 /// `<body/>` (e.g. chat-state notifications), which per RFC 6120 §8.4 must
 /// be ignored rather than treated as errors.
-pub struct ChatMessage {
+pub(all) struct ChatMessage {
   from : @jid.Jid?
   id : String?
   body : String?

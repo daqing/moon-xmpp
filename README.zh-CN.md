@@ -50,23 +50,25 @@ import {
 
 ## 用法
 
-> API 尚未定型，但方向已定：基于 [moonbitlang/async](https://mooncakes.io/docs/moonbitlang/async) 的 async fn。MoonBit 没有 `await` 关键字——async 调用与普通调用写法一致，错误隐式传播。以下示例是示意性的，展示一次会话的预期形态；API 落地后会同步更新。
+> API 基于 [moonbitlang/async](https://mooncakes.io/docs/moonbitlang/async)。MoonBit 没有 `await` 关键字——async 调用与普通调用写法一致，错误隐式传播（会抛 `XmppError` 的函数需在可传播错误的上下文中调用）。
 
 ```moonbit nocheck
 ///|
 async fn main {
   let conn = @xmpp.connect(host="example.com", port=5222)
-  conn.starttls()
-  conn.authenticate(jid="alice@example.com", password="secret")
-  conn.bind_resource("laptop")
+  conn.open_stream(domain="example.com")
+  ignore(conn.starttls(domain="example.com"))
+  ignore(conn.authenticate(jid="alice@example.com", password="secret"))
+  ignore(conn.bind_resource(resource="laptop"))
   conn.send_initial_presence()
-  conn.send_chat(to="bob@example.com", body="Hello from MoonBit!")
+  let id = conn.send_chat(to="bob@example.com", body="Hello from MoonBit!")
+  let stanza = conn.recv_stanza() // Chat / Presence / Other
 }
 ```
 
 ## 演示
 
-`cmd/main` 下有一个小型命令行客户端。客户端功能可用后，完整的验收运行方式如下：
+`cmd/main` 下有一个小型命令行客户端：
 
 ```bash
 git clone https://github.com/daqing/moon-xmpp
@@ -78,7 +80,7 @@ moon run cmd/main -- \
   --body 'Hello from MoonBit!'
 ```
 
-用标准客户端（Psi、Gajim、Conversations）登录 `bob@example.com`，消息会立刻到达；从该客户端发送回复，正在运行的 CLI 也能收到。CLI 的参数名在开发过程中可能还会调整。
+它会建立连接（默认 STARTTLS，可用 `--host`/`--port` 覆盖）、登录、绑定资源、上线、发送消息，然后持续打印收到的消息与 presence 广播，直到流结束。用标准客户端（Psi、Gajim、Conversations）登录 `bob@example.com`，消息会立刻到达；从该客户端发送回复，正在运行的 CLI 也会打印出来。
 
 ## 路线图
 
@@ -88,7 +90,7 @@ moon run cmd/main -- \
 4. [x] 资源绑定 — RFC 6120 §7
 5. [x] 初始 presence — RFC 6121 §4.2
 6. [x] 聊天消息收发 — RFC 6120 §8、RFC 6121 §5.2
-7. [ ] `cmd/main` 命令行演示
+7. [x] `cmd/main` 命令行演示
 
 ## 开发
 
