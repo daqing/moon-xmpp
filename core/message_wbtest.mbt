@@ -70,3 +70,41 @@ async test "send_chat requires a bound session" {
     }
   })
 }
+
+///|
+async test "recv_stanza dispatches chat, presence, and other" {
+  online_loopback(
+    port=46848,
+    server=tcp => {
+      tcp.write(
+        "<iq type='result' id='x'/><message from='bob@example.com' id='a1' type='chat'><body>hello</body></message><presence from='alice@example.com/home'/><message from='bob@example.com' type='chat'><composing xmlns='http://jabber.org/protocol/chatstates'/></message>",
+      )
+      let mut buf = ""
+      for ;; {
+        match tcp.read_some() {
+          None => return
+          Some(data) => {
+            buf = buf + @utf8.decode(data)
+            if buf.contains("</message>") {
+              return
+            }
+          }
+        }
+      }
+    },
+    client_flow=conn => {
+      assert_eq(conn.recv_stanza(), Other)
+      guard conn.recv_stanza() is Chat(msg) else { fail("expected chat") }
+      assert_eq(msg.id, Some("a1"))
+      assert_eq(msg.body, Some("hello"))
+      guard msg.from is Some(f) else { fail("missing from") }
+      assert_eq(f.to_string(), "bob@example.com")
+      guard conn.recv_stanza() is Presence(p) else { fail("expected presence") }
+      guard p.from is Some(pf) else { fail("missing presence from") }
+      assert_eq(pf.to_string(), "alice@example.com/home")
+      // chat-state notification without a body: parsed, body stays None
+      guard conn.recv_stanza() is Chat(typing) else { fail("expected chat") }
+      assert_eq(typing.body, None)
+    },
+  )
+}
