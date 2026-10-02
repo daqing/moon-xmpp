@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1, T2 completed; T3.1 through T3.2 completed.
+> - As of 2026-10-01: T1, T2, T3 completed (T3.1 through T3.3).
 
 ## T1 Design and Foundations
 
@@ -88,9 +88,12 @@ validation follow RFC 7590.
       coalesced into the same segment are not lost), upgrades the transport
       with `Tls::client` (default `trust=SystemRoot` + hostname), and
       restarts the stream over TLS
-- [ ] T3.3 Server certificate validation: hostname matching and expiry via
-      Tls's `host~` + `TrustedRoot::SystemRoot`; disallow plaintext
-      mechanisms on unencrypted streams (pairs with T4.2)
+- [x] T3.3 Server certificate validation: `starttls(verify=true)` (the
+      default) validates the server certificate against `SystemRoot` with
+      hostname matching via `host~`; verified by a loopback test that a
+      self-signed certificate is rejected with a catchable error.
+      `Connection::is_encrypted` exposes the encryption state — T4.2 must
+      refuse plaintext mechanisms when it is false
 
 ## T4 SASL (RFC 6120 §6, framework in RFC 4422)
 
