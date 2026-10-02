@@ -103,7 +103,7 @@ test "self-closing tag with attributes" {
   assert_true(
     frames[0]
     is @xml.Frame::Stanza(
-      "<stream:features><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/></stream:features>",
+      "<stream:features><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/></stream:features>"
     ),
   )
 }

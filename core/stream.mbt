@@ -85,7 +85,7 @@ async fn Connection::read_incoming(
         }
         if el.name is "stream:error" {
           let (condition, error_text) = parse_stream_error(el)
-          raise XmppError::StreamError(condition=condition, text=error_text)
+          raise XmppError::StreamError(condition~, text=error_text)
         }
         return Element(el)
       }

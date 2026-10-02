@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 completed, T2.1 through T2.4 completed.
+> - As of 2026-10-01: T1 and T2 completed (T2.1 through T2.5).
 
 ## T1 Design and Foundations
 
@@ -67,8 +67,10 @@ handle stream-level errors.
       `StreamErrorCondition` (incl. see-other-host); a `stream:error` stanza
       read from the stream raises `XmppError::StreamError` with the optional
       `<text/>`
-- [ ] T2.5 Stanza error parsing (RFC 6120 §8.3): type and condition of
-      `<error/>` children
+- [x] T2.5 Stanza error parsing (RFC 6120 §8.3): type and condition of
+      `<error/>` children — `StanzaError::parse` maps all §8.3.3 conditions
+      (incl. redirect) plus the error type, optional text, and unknown
+      application conditions
 
 ## T3 STARTTLS (RFC 6120 §5)
 

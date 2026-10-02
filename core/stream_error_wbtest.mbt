@@ -5,7 +5,8 @@ test "parse stream error with text" {
   )
   let (condition, text) = parse_stream_error(el)
   assert_true(
-    condition == StreamErrorCondition::SeeOtherHost(host="other.example.com:5222"),
+    condition ==
+    StreamErrorCondition::SeeOtherHost(host="other.example.com:5222"),
   )
   assert_eq(text, Some("moved"))
 }

@@ -20,10 +20,12 @@ async test "stream error is raised during open_stream" {
           err
           is @core.XmppError::StreamError(
             condition=@core.StreamErrorCondition::SystemShutdown,
-            text=_,
+            text=_
           ),
         )
-    } noraise { _ => fail("expected stream error") }
+    } noraise {
+      _ => fail("expected stream error")
+    }
     conn.close()
   })
 }

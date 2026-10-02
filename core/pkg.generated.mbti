@@ -3,6 +3,7 @@ package "daqing/moon-xmpp/core"
 
 import {
   "daqing/moon-xmpp/xml",
+  "moonbit-community/XMLParser",
   "moonbitlang/core/debug",
 }
 
@@ -10,10 +11,69 @@ import {
 pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError
 
 // Errors
+pub(all) suberror StanzaErrorCondition {
+  BadRequest
+  Conflict
+  FeatureNotImplemented
+  Forbidden
+  Gone
+  InternalServerError
+  ItemNotFound
+  JidMalformed
+  NotAcceptable
+  NotAllowed
+  NotAuthorized
+  PolicyViolation
+  RecipientUnavailable
+  Redirect(uri~ : String)
+  RegistrationRequired
+  RemoteServerNotFound
+  RemoteServerTimeout
+  ResourceConstraint
+  ServiceUnavailable
+  SubscriptionRequired
+  UndefinedCondition
+  UnexpectedRequest
+  Unknown(String)
+} derive(Eq, @debug.Debug)
+pub fn StanzaErrorCondition::equal(Self, Self) -> Bool
+pub fn StanzaErrorCondition::not_equal(Self, Self) -> Bool
+pub fn StanzaErrorCondition::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror StreamErrorCondition {
+  BadFormat
+  BadNamespacePrefix
+  Conflict
+  ConnectionTimeout
+  HostGone
+  HostUnknown
+  ImproperAddressing
+  InternalServerError
+  InvalidFrom
+  InvalidNamespace
+  InvalidXml
+  NotAuthorized
+  PolicyViolation
+  RemoteConnectionFailed
+  Reset
+  ResourceConstraint
+  RestrictedXml
+  SeeOtherHost(host~ : String)
+  SystemShutdown
+  UndefinedCondition
+  UnsupportedEncoding
+  UnsupportedStanzaType
+  UnsupportedVersion
+  Unknown(String)
+} derive(Eq, @debug.Debug)
+pub fn StreamErrorCondition::equal(Self, Self) -> Bool
+pub fn StreamErrorCondition::not_equal(Self, Self) -> Bool
+pub fn StreamErrorCondition::to_repr(Self) -> @debug.Repr
+
 pub(all) suberror XmppError {
   ConnectionClosed
   Io(detail~ : String)
-  StreamError(condition~ : String)
+  StreamError(condition~ : StreamErrorCondition, text~ : String?)
   ProtocolViolation(detail~ : String)
 } derive(Eq, @debug.Debug)
 pub fn XmppError::equal(Self, Self) -> Bool
@@ -47,6 +107,28 @@ pub struct Features {
 pub fn Features::equal(Self, Self) -> Bool
 pub fn Features::not_equal(Self, Self) -> Bool
 pub fn Features::to_repr(Self) -> @debug.Repr
+
+pub struct StanzaError {
+  error_type : StanzaErrorType
+  condition : StanzaErrorCondition
+  text : String?
+} derive(Eq, @debug.Debug)
+pub fn StanzaError::equal(Self, Self) -> Bool
+pub fn StanzaError::not_equal(Self, Self) -> Bool
+pub fn StanzaError::parse(@XMLParser.XMLElement) -> Self raise XmppError
+pub fn StanzaError::to_repr(Self) -> @debug.Repr
+
+pub(all) enum StanzaErrorType {
+  Auth
+  Cancel
+  Continue
+  Modify
+  Wait
+  Unknown(String)
+} derive(Eq, @debug.Debug)
+pub fn StanzaErrorType::equal(Self, Self) -> Bool
+pub fn StanzaErrorType::not_equal(Self, Self) -> Bool
+pub fn StanzaErrorType::to_repr(Self) -> @debug.Repr
 
 pub struct StreamHeader {
   id : String
