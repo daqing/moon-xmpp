@@ -93,9 +93,11 @@ pub struct Connection {
 }
 pub fn Connection::close(Self) -> Unit
 pub fn Connection::is_closed(Self) -> Bool
+pub fn Connection::is_encrypted(Self) -> Bool
 pub async fn Connection::open_stream(Self, domain~ : String) -> Features raise XmppError
 pub async fn Connection::restart_stream(Self, domain~ : String) -> Features raise XmppError
 pub async fn Connection::send_raw(Self, String) -> Unit raise XmppError
+pub async fn Connection::starttls(Self, domain~ : String, verify? : Bool) -> Features raise XmppError
 pub fn Connection::stream_id(Self) -> String?
 
 pub struct Features {

@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 and T2 completed (T2.1 through T2.5).
+> - As of 2026-10-01: T1, T2, T3 completed (T3.1 through T3.3).
 
 ## T1 Design and Foundations
 
@@ -77,16 +77,23 @@ handle stream-level errors.
 Goal: upgrade the plaintext stream to TLS; algorithms and certificate
 validation follow RFC 7590.
 
-- [ ] T3.1 TLS choice made: moonbitlang/async/tls (OpenSSL-backed).
-      Remaining work: pin the version, and verify that `Tls::client_from_pair`
-      can upgrade the already-established TCP connection, as STARTTLS
-      requires
-- [ ] T3.2 `<starttls/>` negotiation: honor the `required` flag, send the
-      request, handle `proceeded` / `failure`, restart the stream after the
-      TLS handshake
-- [ ] T3.3 Server certificate validation: hostname matching and expiry via
-      Tls's `host~` + `TrustedRoot::SystemRoot`; disallow plaintext
-      mechanisms on unencrypted streams (pairs with T4.2)
+- [x] T3.1 TLS choice made: moonbitlang/async/tls@0.22.4 (OpenSSL-backed,
+      version pinned together with moonbitlang/async). Verified with a
+      loopback TLS test that `Tls::client` upgrades an established TCP
+      connection; self-signed test cert lives in core/testdata and is only
+      used with trust=NoVerification in tests
+- [x] T3.2 `<starttls/>` negotiation: `Connection::starttls` verifies the
+      feature was advertised, sends the request, reads `proceed` /
+      `failure` byte-by-byte from the raw socket (so TLS handshake bytes
+      coalesced into the same segment are not lost), upgrades the transport
+      with `Tls::client` (default `trust=SystemRoot` + hostname), and
+      restarts the stream over TLS
+- [x] T3.3 Server certificate validation: `starttls(verify=true)` (the
+      default) validates the server certificate against `SystemRoot` with
+      hostname matching via `host~`; verified by a loopback test that a
+      self-signed certificate is rejected with a catchable error.
+      `Connection::is_encrypted` exposes the encryption state — T4.2 must
+      refuse plaintext mechanisms when it is false
 
 ## T4 SASL (RFC 6120 §6, framework in RFC 4422)
 

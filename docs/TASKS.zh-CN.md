@@ -5,7 +5,7 @@
 > - 编号规则：`T<阶段>.<序号>`，阶段内顺序即建议实施顺序。
 > - 进度规则：每完成一项就勾选；完成协议能力相关的任务后，同步更新 README（中英两份）的协议覆盖表状态与 Roadmap 复选框。
 > - 依赖关系：T1 → T2 → … → T8 依次依赖；**T9.1（本地 ejabberd 环境）建议提前到 T2 开始前完成**，因为从流协商起就需要真实服务器联调。JID、XML、SCRAM 等纯计算任务不依赖服务器，可随时穿插进行。
-> - 截至 2026-10-01：T1、T2 已完成（T2.1 至 T2.5）。
+> - 截至 2026-10-01：T1、T2、T3 已完成（T3.1 至 T3.3）。
 
 ## T1 设计与基础
 
@@ -31,9 +31,9 @@
 
 目标：把明文流升级为加密流，算法与证书校验遵循 RFC 7590。
 
-- [ ] T3.1 TLS 选型已定：moonbitlang/async/tls（基于 OpenSSL）。剩余工作：锁版本，并验证 `Tls::client_from_pair` 能在已建立的 TCP 连接上升级加密（STARTTLS 的要求）
-- [ ] T3.2 `<starttls/>` 协商：识别 `required` 标志、发送请求、处理 `proceeded` / `failure`，TLS 握手后重启流
-- [ ] T3.3 服务器证书校验：通过 Tls 的 `host~` + `TrustedRoot::SystemRoot` 做域名匹配与有效期校验；未加密流上禁用明文机制（与 T4.2 配合）
+- [x] T3.1 TLS 选型已定：moonbitlang/async/tls@0.22.4（基于 OpenSSL，版本随 moonbitlang/async 锁定）。已用回环 TLS 测试验证 `Tls::client` 能在已建立的 TCP 连接上升级加密；自签名测试证书在 core/testdata，仅测试中以 trust=NoVerification 使用
+- [x] T3.2 `<starttls/>` 协商：`Connection::starttls` 校验服务器已通告该特性、发送请求、从原始 socket 逐字节读取 `proceed` / `failure`（避免同段合并的 TLS 握手字节丢失）、用 `Tls::client` 升级传输层（默认 `trust=SystemRoot` + 域名校验），并在 TLS 上重启流
+- [x] T3.3 服务器证书校验：`starttls(verify=true)`（默认值）通过 `TrustedRoot::SystemRoot` + `host~` 域名匹配校验服务器证书；回环测试验证自签名证书会被拒绝且错误可捕获。`Connection::is_encrypted` 暴露加密状态——T4.2 必须在其为 false 时拒绝明文机制
 
 ## T4 SASL（RFC 6120 §6，框架为 RFC 4422）
 
