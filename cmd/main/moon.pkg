@@ -1,5 +1,9 @@
-// import {
-//   "daqing/moon-xmpp" @lib,
-// }
+import {
+  "daqing/moon-xmpp/jid",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/string",
+}
 
-pkgtype(kind: "executable")
+options(
+  "is-main": true,
+)
