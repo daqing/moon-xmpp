@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 and T2 completed (T2.1 through T2.5).
+> - As of 2026-10-01: T1, T2 completed; T3.1 completed.
 
 ## T1 Design and Foundations
 
@@ -77,10 +77,11 @@ handle stream-level errors.
 Goal: upgrade the plaintext stream to TLS; algorithms and certificate
 validation follow RFC 7590.
 
-- [ ] T3.1 TLS choice made: moonbitlang/async/tls (OpenSSL-backed).
-      Remaining work: pin the version, and verify that `Tls::client_from_pair`
-      can upgrade the already-established TCP connection, as STARTTLS
-      requires
+- [x] T3.1 TLS choice made: moonbitlang/async/tls@0.22.4 (OpenSSL-backed,
+      version pinned together with moonbitlang/async). Verified with a
+      loopback TLS test that `Tls::client` upgrades an established TCP
+      connection; self-signed test cert lives in core/testdata and is only
+      used with trust=NoVerification in tests
 - [ ] T3.2 `<starttls/>` negotiation: honor the `required` flag, send the
       request, handle `proceeded` / `failure`, restart the stream after the
       TLS handshake

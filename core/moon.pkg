@@ -9,6 +9,7 @@ import {
 import {
   "moonbitlang/async",
   "moonbitlang/async/socket",
+  "moonbitlang/async/tls",
   "moonbitlang/core/encoding/utf8",
 } for "test"
 
