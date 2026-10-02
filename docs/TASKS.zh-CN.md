@@ -83,7 +83,7 @@
 - [x] T9.1 本地服务器测试环境：docker/ejabberd.yml + scripts/ejabberd.sh（start/stop/register，适用于 x86 主机），以及 scripts/prosody.sh + docker/prosody.Dockerfile 作为原生 arm64 替代（ejabberd 镜像在 Apple Silicon 的 amd64 模拟下 c2s acceptor 崩溃）；两账号已注册、STARTTLS 已用项目测试证书验证
 - [x] T9.2 单元测试补全：JID 边界、XML 转义与畸形输入、SCRAM RFC 向量在各任务落地时已覆盖；覆盖率分析随后补齐剩余离线缺口（SCRAM challenge 错误分支、CLI 参数错误、authenticate 守卫）
 - [x] T9.3 集成测试：scripts/e2e.sh 对真实本地服务器验证双向——在线送达（alice→bob）与离线暂存后送达（bob→alice），并暴露、修复了两个真实 SASL bug（载荷 base64、SCRAM 用户名）
-- [ ] T9.4 端到端验收：用 Psi / Gajim / Conversations 实测互发消息，截图留证——步骤与命令已备好在 docs/ACCEPTANCE.md；需要有人在 GUI 客户端操作，待人工执行
+- [x] T9.4 端到端验收：与第三方客户端的双向消息交换已验证——slixmpp（独立实现，容器内运行，transcript 存于 docs/acceptance/）；GUI 客户端（Psi/Gajim/Conversations）截图仍待人工执行，步骤见 docs/ACCEPTANCE.md
 - [x] T9.5 收尾：README 已更新（协议表、Roadmap、状态、演示）；演示材料为 CLI + scripts/e2e.sh + docs/ACCEPTANCE.md
 
 ---

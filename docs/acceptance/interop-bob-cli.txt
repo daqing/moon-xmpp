@@ -1,0 +1,3 @@
+message msg_2 sent to alice@localhost
+* bob@localhost/1ksr0k8upfq_ is available
+[alice@localhost/dX1JOXy_OdLH] pong from slixmpp

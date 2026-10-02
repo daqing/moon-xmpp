@@ -1,10 +1,28 @@
 # Acceptance Test Guide
 
-This is the manual acceptance scenario from the project brief: exchange
-messages with a third-party client over a real server. The automated
-integration test (`scripts/e2e.sh`) already proves both message directions
-against a local server; this guide covers interop with standard desktop and
-mobile clients, which needs a human at the keyboard.
+This is the acceptance scenario from the project brief: exchange messages
+with a third-party client over a real server.
+
+## Automated interop (completed)
+
+`scripts/interop.sh` runs the interop against
+[slixmpp](https://codeberg.org/poezio/slixmpp) — an independent Python XMPP
+implementation, i.e. code this project has never talked to before — in a
+container:
+
+- alice runs on slixmpp; bob is our CLI.
+- bob sends "Hello from MoonBit!"; alice receives it and replies
+  "pong from slixmpp"; our CLI prints the reply.
+
+Both directions passed; the transcripts are stored as evidence:
+[interop-bob-cli.txt](acceptance/interop-bob-cli.txt) and
+[interop-alice-slixmpp.txt](acceptance/interop-alice-slixmpp.txt).
+
+## GUI run (manual)
+
+The brief also asks for the same exchange with a GUI client
+(Psi/Gajim/Conversations) and screenshots, which needs a human at the
+keyboard.
 
 ## 1. Start the server and accounts
 

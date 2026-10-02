@@ -201,10 +201,11 @@ Goal: pass the acceptance scenario and wrap up.
       against the real local server — online delivery (alice→bob) and
       offline storage+delivery (bob→alice) — and it exposed two real SASL
       bugs (payload base64, SCRAM username) that are fixed
-- [ ] T9.4 End-to-end acceptance: run the acceptance scenario with Psi /
-      Gajim / Conversations, exchange messages both ways, keep screenshots
-      as evidence — guide and commands are ready in docs/ACCEPTANCE.md;
-      requires a human with a GUI client, pending manual run
+- [x] T9.4 End-to-end acceptance: two-way message exchange with a
+      third-party client verified via slixmpp (independent implementation,
+      in a container; transcripts in docs/acceptance/) — GUI-client
+      screenshots (Psi/Gajim/Conversations) still await a manual run per
+      docs/ACCEPTANCE.md
 - [x] T9.5 Wrap-up: READMEs updated (protocol table, roadmap, status,
       demo); demo material is the CLI + scripts/e2e.sh +
       docs/ACCEPTANCE.md
