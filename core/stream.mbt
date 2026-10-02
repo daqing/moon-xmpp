@@ -51,13 +51,10 @@ fn parse_stream_header(root : String) -> StreamHeader raise XmppError {
         detail="unsupported stream version \{other}",
       )
     None =>
-      raise XmppError::ProtocolViolation(
-        detail="stream header without version",
-      )
+      raise XmppError::ProtocolViolation(detail="stream header without version")
   }
   match el.get_attribute("id") {
-    Some(id) =>
-      { id, from: el.get_attribute("from"), version: "1.0" }
+    Some(id) => { id, from: el.get_attribute("from"), version: "1.0", }
     None =>
       raise XmppError::ProtocolViolation(detail="stream header without id")
   }
@@ -94,11 +91,11 @@ async fn Connection::read_incoming(
 }
 
 ///|
-/// Open the XML stream and return the server's advertised features element.
+/// Open the XML stream and return the server's advertised features.
 pub async fn Connection::open_stream(
   self : Connection,
   domain~ : String,
-) -> @XMLParser.XMLElement raise XmppError {
+) -> Features raise XmppError {
   self.send_raw(build_stream_header(domain))
   match self.read_incoming() {
     Header(text) => self.stream_header = Some(parse_stream_header(text))
@@ -108,24 +105,26 @@ pub async fn Connection::open_stream(
   match self.read_incoming() {
     Element(el) =>
       if el.name is "stream:features" {
-        el
+        parse_features(el)
       } else {
         raise XmppError::ProtocolViolation(
           detail="expected stream:features, got \{el.name}",
         )
       }
     Header(_) =>
-      raise XmppError::ProtocolViolation(detail="unexpected second stream header")
+      raise XmppError::ProtocolViolation(
+        detail="unexpected second stream header",
+      )
   }
 }
 
 ///|
 /// Restart the XML stream (after TLS or SASL negotiation) and return the
-/// server's advertised features element.
+/// server's advertised features.
 pub async fn Connection::restart_stream(
   self : Connection,
   domain~ : String,
-) -> @XMLParser.XMLElement raise XmppError {
+) -> Features raise XmppError {
   self.byte_stream.reset()
   self.frames.clear()
   self.frame_pos = 0

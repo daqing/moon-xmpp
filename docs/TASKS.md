@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 completed, T2.1 through T2.2 completed.
+> - As of 2026-10-01: T1 completed, T2.1 through T2.3 completed.
 
 ## T1 Design and Foundations
 
@@ -57,8 +57,11 @@ handle stream-level errors.
       `restart_stream`; the response header is validated (stream namespace,
       version 1.0, id); frames from one socket read are buffered so none are
       dropped between reads
-- [ ] T2.3 Stream features parsing: recognize at least `starttls`,
-      `mechanisms`, and `bind`
+- [x] T2.3 Stream features parsing: recognize at least `starttls`,
+      `mechanisms`, and `bind` — `open_stream` / `restart_stream` return a
+      `Features` summary; local-name matching, unknown features ignored.
+      Also fixed a framer bug surfaced by the loopback test: `/` in a tag's
+      attribute region now correctly marks the tag self-closing
 - [ ] T2.4 Stream error handling (RFC 6120 §4.9): parse, report upstream,
       disconnect
 - [ ] T2.5 Stanza error parsing (RFC 6120 §8.3): type and condition of

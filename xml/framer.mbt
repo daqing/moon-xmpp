@@ -98,7 +98,8 @@ pub fn Framer::push(
 }
 
 ///|
-fn Framer::reset(self : Framer) -> Unit {
+/// Reset the framer to its initial state, for a stream restart.
+pub fn Framer::reset(self : Framer) -> Unit {
   self.buf.reset()
   self.name_buf.reset()
   self.open_tags.clear()
@@ -209,6 +210,10 @@ fn Framer::scan_tag(
   }
   if c is ('"' | '\'') {
     self.quote = Some(c)
+    return
+  }
+  if c is '/' {
+    self.self_closing = true
     return
   }
   if c is '>' {

@@ -18,22 +18,36 @@ test "parse stream header" {
 
 ///|
 test "parse stream header rejections" {
-  try parse_stream_header(
-    "<stream:stream version='1.0' xmlns:stream='http://etherx.jabber.org/streams'",
-  ) catch {
+  try
+    parse_stream_header(
+      "<stream:stream version='1.0' xmlns:stream='http://etherx.jabber.org/streams'",
+    )
+  catch {
     err => assert_true(err is XmppError::ProtocolViolation(detail=_))
-  } noraise { _ => fail("expected error for missing id") }
-  try parse_stream_header(
-    "<stream:stream id='x' version='0.9' xmlns:stream='http://etherx.jabber.org/streams'",
-  ) catch {
+  } noraise {
+    _ => fail("expected error for missing id")
+  }
+  try
+    parse_stream_header(
+      "<stream:stream id='x' version='0.9' xmlns:stream='http://etherx.jabber.org/streams'",
+    )
+  catch {
     err => assert_true(err is XmppError::ProtocolViolation(detail=_))
-  } noraise { _ => fail("expected error for bad version") }
-  try parse_stream_header(
-    "<stream:stream id='x' version='1.0' xmlns:stream='http://wrong.example/'",
-  ) catch {
+  } noraise {
+    _ => fail("expected error for bad version")
+  }
+  try
+    parse_stream_header(
+      "<stream:stream id='x' version='1.0' xmlns:stream='http://wrong.example/'",
+    )
+  catch {
     err => assert_true(err is XmppError::ProtocolViolation(detail=_))
-  } noraise { _ => fail("expected error for wrong namespace") }
+  } noraise {
+    _ => fail("expected error for wrong namespace")
+  }
   try parse_stream_header("<stream:stream id='x' version='1.0'") catch {
     err => assert_true(err is XmppError::ProtocolViolation(detail=_))
-  } noraise { _ => fail("expected error for missing namespace") }
+  } noraise {
+    _ => fail("expected error for missing namespace")
+  }
 }

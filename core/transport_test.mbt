@@ -3,7 +3,7 @@ async test "connect, send, close over loopback" {
   let addr = @socket.Addr::parse("127.0.0.1:46821") catch {
     _ => fail("invalid test addr")
   }
-  let server = @socket.TcpServer::TcpServer(addr)
+  let server = @socket.TcpServer::TcpServer(addr, reuse_addr=true)
   @async.with_task_group(group => {
     group.spawn_bg(() => {
       let (client, _) = server.accept()

@@ -33,7 +33,29 @@ pub struct Connection {
 }
 pub fn Connection::close(Self) -> Unit
 pub fn Connection::is_closed(Self) -> Bool
+pub async fn Connection::open_stream(Self, domain~ : String) -> Features raise XmppError
+pub async fn Connection::restart_stream(Self, domain~ : String) -> Features raise XmppError
 pub async fn Connection::send_raw(Self, String) -> Unit raise XmppError
+pub fn Connection::stream_id(Self) -> String?
+
+pub struct Features {
+  starttls : Bool
+  starttls_required : Bool
+  mechanisms : Array[String]
+  bind : Bool
+} derive(Eq, @debug.Debug)
+pub fn Features::equal(Self, Self) -> Bool
+pub fn Features::not_equal(Self, Self) -> Bool
+pub fn Features::to_repr(Self) -> @debug.Repr
+
+pub struct StreamHeader {
+  id : String
+  from : String?
+  version : String
+} derive(Eq, @debug.Debug)
+pub fn StreamHeader::equal(Self, Self) -> Bool
+pub fn StreamHeader::not_equal(Self, Self) -> Bool
+pub fn StreamHeader::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

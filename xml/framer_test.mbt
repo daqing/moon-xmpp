@@ -91,3 +91,19 @@ test "prolog is skipped" {
   assert_eq(frames.length(), 1)
   assert_true(frames[0] is @xml.Frame::Root("<stream:stream>"))
 }
+
+///|
+test "self-closing tag with attributes" {
+  let f = @xml.Framer::new()
+  ignore(f.push("<stream:stream>"))
+  let frames = f.push(
+    "<stream:features><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/></stream:features>",
+  )
+  assert_eq(frames.length(), 1)
+  assert_true(
+    frames[0]
+    is @xml.Frame::Stanza(
+      "<stream:features><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/></stream:features>",
+    ),
+  )
+}
