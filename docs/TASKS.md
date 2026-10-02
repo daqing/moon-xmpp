@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 through T7 completed; T8.1 through T8.3 completed.
+> - As of 2026-10-01: T1 through T8 completed; T9.1 through T9.3 and T9.5 completed; T9.4 awaits a manual GUI run (docs/ACCEPTANCE.md).
 
 ## T1 Design and Foundations
 
@@ -187,19 +187,27 @@ Goal: reproduce the acceptance scenario with one command.
 
 Goal: pass the acceptance scenario and wrap up.
 
-- [ ] T9.1 Local ejabberd test environment: run ejabberd in Docker, register
-      two test accounts, one-command start/stop script (**do this before
-      T2**)
-- [ ] T9.2 Unit test coverage: JID edge cases, XML escaping and malformed
-      input, SCRAM against the RFC 5802 test vectors
-- [ ] T9.3 Integration test: exchange messages over the full chain (CLI to
-      CLI, or library-level)
+- [x] T9.1 Local server test environment: docker/ejabberd.yml +
+      scripts/ejabberd.sh (start/stop/register; works on x86 hosts) and
+      scripts/prosody.sh + docker/prosody.Dockerfile as the native-arm64
+      alternative, since the ejabberd image crashes its c2s acceptor under
+      amd64 emulation on Apple Silicon; both accounts registered and
+      STARTTLS verified against the project test certificate
+- [x] T9.2 Unit test coverage: JID edge cases, XML escaping and malformed
+      input, and the SCRAM RFC vectors were covered as each task landed;
+      coverage analysis then filled the remaining offline gaps (SCRAM
+      challenge error branches, CLI argument errors, authenticate guards)
+- [x] T9.3 Integration test: scripts/e2e.sh verifies both directions
+      against the real local server — online delivery (alice→bob) and
+      offline storage+delivery (bob→alice) — and it exposed two real SASL
+      bugs (payload base64, SCRAM username) that are fixed
 - [ ] T9.4 End-to-end acceptance: run the acceptance scenario with Psi /
       Gajim / Conversations, exchange messages both ways, keep screenshots
       as evidence — guide and commands are ready in docs/ACCEPTANCE.md;
       requires a human with a GUI client, pending manual run
-- [ ] T9.5 Wrap-up: update the READMEs (protocol table status, Roadmap
-      checkboxes, Status section), prepare demo material
+- [x] T9.5 Wrap-up: READMEs updated (protocol table, roadmap, status,
+      demo); demo material is the CLI + scripts/e2e.sh +
+      docs/ACCEPTANCE.md
 
 ---
 

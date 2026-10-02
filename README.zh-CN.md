@@ -4,7 +4,7 @@ MoonBit 的 XMPP 客户端库，实现 XMPP Core（[RFC 6120](https://www.rfc-ed
 
 ## 项目状态
 
-**开发中。** moon-xmpp 是一个 MoonBit 黑客松参赛项目。核心会话生命周期（流、STARTTLS、SASL、绑定、presence、聊天）已实现并通过进程内回环服务器测试；接下来是对接真实 ejabberd 实例与 CLI 演示——见下文「路线图」。
+**开发中。** moon-xmpp 是一个 MoonBit 黑客松参赛项目。核心会话生命周期（流、STARTTLS、SASL、绑定、presence、聊天）已实现，有 100+ 测试覆盖，并在真实本地 XMPP 服务器上完成集成验证（见 `scripts/e2e.sh`）；剩余步骤是与 GUI 客户端的互操作实测——见下文「路线图」与 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)。
 
 ## 它做什么
 
@@ -103,7 +103,14 @@ moon fmt     # 格式化代码
 moon info    # 重新生成包接口
 ```
 
-集成测试计划在本地 ejabberd 实例上进行。
+集成测试对本地 XMPP 服务器运行：
+
+```bash
+scripts/prosody.sh start                    # x86 主机可用 scripts/ejabberd.sh
+scripts/prosody.sh register alice secret123
+scripts/prosody.sh register bob secret123
+scripts/e2e.sh                              # 双向送达测试
+```
 
 ## 许可证
 

@@ -8,9 +8,10 @@ An XMPP client library for MoonBit, implementing the client side of
 
 **Work in progress.** moon-xmpp is being developed as an entry for a MoonBit
 hackathon. The core session lifecycle (streams, STARTTLS, SASL, binding,
-presence, chat) is implemented and covered by tests against in-process loop
-back servers; integration against a real ejabberd instance and the CLI demo
-are next — see [Roadmap](#roadmap).
+presence, chat) is implemented, covered by 100+ tests, and verified against
+a real local XMPP server (see `scripts/e2e.sh`); GUI-client interop testing
+is the remaining step — see [Roadmap](#roadmap) and
+[docs/ACCEPTANCE.md](docs/ACCEPTANCE.md).
 
 ## What it does
 
@@ -126,7 +127,14 @@ moon fmt     # format the code
 moon info    # regenerate package interfaces
 ```
 
-Integration testing is planned against a local ejabberd instance.
+Integration testing runs against a local XMPP server:
+
+```bash
+scripts/prosody.sh start                    # or scripts/ejabberd.sh on x86
+scripts/prosody.sh register alice secret123
+scripts/prosody.sh register bob secret123
+scripts/e2e.sh                              # two-direction delivery test
+```
 
 ## License
 
