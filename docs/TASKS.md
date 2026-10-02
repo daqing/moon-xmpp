@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 completed, T2.1 through T2.3 completed.
+> - As of 2026-10-01: T1 completed, T2.1 through T2.4 completed.
 
 ## T1 Design and Foundations
 
@@ -62,8 +62,11 @@ handle stream-level errors.
       `Features` summary; local-name matching, unknown features ignored.
       Also fixed a framer bug surfaced by the loopback test: `/` in a tag's
       attribute region now correctly marks the tag self-closing
-- [ ] T2.4 Stream error handling (RFC 6120 §4.9): parse, report upstream,
-      disconnect
+- [x] T2.4 Stream error handling (RFC 6120 §4.9): parse, report upstream,
+      disconnect — all §4.9.3 conditions mapped to a structured
+      `StreamErrorCondition` (incl. see-other-host); a `stream:error` stanza
+      read from the stream raises `XmppError::StreamError` with the optional
+      `<text/>`
 - [ ] T2.5 Stanza error parsing (RFC 6120 §8.3): type and condition of
       `<error/>` children
 
