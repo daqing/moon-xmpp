@@ -2,6 +2,7 @@ import {
   "daqing/moon-xmpp/xml",
   "moonbit-community/XMLParser",
   "moonbitlang/async/socket",
+  "moonbitlang/async/tls",
   "moonbitlang/core/debug",
   "moonbitlang/core/encoding/utf8",
 }

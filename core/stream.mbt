@@ -109,7 +109,9 @@ pub async fn Connection::open_stream(
   match self.read_incoming() {
     Element(el) =>
       if el.name is "stream:features" {
-        parse_features(el)
+        let f = parse_features(el)
+        self.features = Some(f)
+        f
       } else {
         raise XmppError::ProtocolViolation(
           detail="expected stream:features, got \{el.name}",

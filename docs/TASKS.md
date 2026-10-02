@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1, T2 completed; T3.1 completed.
+> - As of 2026-10-01: T1, T2 completed; T3.1 through T3.2 completed.
 
 ## T1 Design and Foundations
 
@@ -82,9 +82,12 @@ validation follow RFC 7590.
       loopback TLS test that `Tls::client` upgrades an established TCP
       connection; self-signed test cert lives in core/testdata and is only
       used with trust=NoVerification in tests
-- [ ] T3.2 `<starttls/>` negotiation: honor the `required` flag, send the
-      request, handle `proceeded` / `failure`, restart the stream after the
-      TLS handshake
+- [x] T3.2 `<starttls/>` negotiation: `Connection::starttls` verifies the
+      feature was advertised, sends the request, reads `proceed` /
+      `failure` byte-by-byte from the raw socket (so TLS handshake bytes
+      coalesced into the same segment are not lost), upgrades the transport
+      with `Tls::client` (default `trust=SystemRoot` + hostname), and
+      restarts the stream over TLS
 - [ ] T3.3 Server certificate validation: hostname matching and expiry via
       Tls's `host~` + `TrustedRoot::SystemRoot`; disallow plaintext
       mechanisms on unencrypted streams (pairs with T4.2)
