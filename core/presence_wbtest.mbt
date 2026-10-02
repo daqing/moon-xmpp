@@ -66,3 +66,41 @@ async test "initial presence requires a bound session" {
     assert_eq(conn.state(), Connecting)
   })
 }
+
+///|
+async test "recv_presence parses broadcasts and skips other stanzas" {
+  presence_loopback(
+    port=46843,
+    server=tcp => {
+      tcp.write(
+        "<iq type='result' id='x'/><presence from='alice@example.com/home'/><presence from='bob@example.com' type='unavailable'><status>gone fishing</status></presence>",
+      )
+      let mut buf = ""
+      for ;; {
+        match tcp.read_some() {
+          None => return
+          Some(data) => {
+            buf = buf + @utf8.decode(data)
+            if buf.contains("</presence>") {
+              return
+            }
+          }
+        }
+      }
+    },
+    client_flow=conn => {
+      let p1 = conn.recv_presence()
+      assert_eq(p1.presence_type, None)
+      assert_eq(p1.status, None)
+      guard p1.from is Some(f1) else { fail("missing from") }
+      assert_eq(f1.to_string(), "alice@example.com/home")
+      let p2 = conn.recv_presence()
+      assert_eq(p2.presence_type, Some("unavailable"))
+      assert_eq(p2.status, Some("gone fishing"))
+      assert_eq(
+        p2.from.map(fn(j) { j.bare().to_string() }),
+        Some("bob@example.com"),
+      )
+    },
+  )
+}
