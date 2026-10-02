@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1, T2, T3 completed; T4.1 through T4.3 completed.
+> - As of 2026-10-01: T1, T2, T3 completed; T4.1 through T4.4 completed.
 
 ## T1 Design and Foundations
 
@@ -115,8 +115,9 @@ negotiation framework.
       against the RFC 5802 §5.1 test vector and a loopback wire test with a
       real proof-verifying fake server. SASL challenge/success payloads are
       base64-decoded before parsing per RFC 6120 §6.4.2
-- [ ] T4.4 SCRAM-SHA-256 (RFC 7677): reuse the T4.3 framework with a
-      different hash
+- [x] T4.4 SCRAM-SHA-256 (RFC 7677): reuses the T4.3 framework with the
+      SHA-256 algorithm; validated against the RFC 7677 §3 test vector and a
+      loopback wire test (both algorithms share one parametrized scenario)
 - [ ] T4.5 (optional stretch) SCRAM channel binding (`-PLUS` variants) —
       async/tls already exposes tls-unique and tls-server-end-point bindings
       (RFC 5929), so the primitives exist

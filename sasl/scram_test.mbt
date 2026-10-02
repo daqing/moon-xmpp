@@ -20,6 +20,29 @@ test "rfc5802 sha-1 vector" {
 }
 
 ///|
+/// RFC 7677 Â§3 test vector: user / pencil, SCRAM-SHA-256.
+test "rfc7677 sha-256 vector" {
+  let nonce = @base64.decode("rOprNGfwEbeRWgbNEkqO")
+  let (client, first) = @sasl.ScramClient::start(
+    alg=@sasl.Sha256,
+    username="user",
+    password="pencil",
+    nonce~,
+    gs2="n",
+    cb_data=b"",
+  )
+  assert_eq(first, "n,,n=user,r=rOprNGfwEbeRWgbNEkqO")
+  let server_first = "r=rOprNGfwEbeRWgbNEkqO%hvYDpWUa2RaTCAfuxFIlj)hNlF$k0,s=W22ZaJ0SNY7soEsUEjb6gQ==,i=4096"
+  let final_msg = client.client_final(server_first~)
+  assert_eq(
+    final_msg, "c=biws,r=rOprNGfwEbeRWgbNEkqO%hvYDpWUa2RaTCAfuxFIlj)hNlF$k0,p=dHzbZapWIk4jUhN+Ute9ytag9zjfMHgsqmmiz7AndVQ=",
+  )
+  client.verify_server_final(
+    server_final="v=6rriTRBi23WpRR/wtup+mMhUZUn/dB5nLTJRsjl95G4=",
+  )
+}
+
+///|
 test "rejects bad server signature" {
   let nonce = @base64.decode("fyko+d2lbbFgONRv9qkxdawL")
   let (client, _) = @sasl.ScramClient::start(

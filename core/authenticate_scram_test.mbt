@@ -19,8 +19,16 @@ fn test_attr(msg : String, key : String) -> String? {
 }
 
 ///|
-async test "authenticate with scram-sha-1 over loopback" {
-  let addr = @socket.Addr::parse("127.0.0.1:46833") catch {
+/// Run a full SCRAM login against a loopback fake server that verifies the
+/// client's proof with the known password ("pencil") and answers with a
+/// valid server signature.
+#warnings("-alert_internal")
+async fn scram_loopback(alg~ : @sasl.ScramAlg, port~ : Int) -> Unit {
+  let mech = match alg {
+    @sasl.Sha1 => "SCRAM-SHA-1"
+    @sasl.Sha256 => "SCRAM-SHA-256"
+  }
+  let addr = @socket.Addr::parse("127.0.0.1:\{port}") catch {
     _ => fail("invalid test addr")
   }
   let server = @socket.TcpServer::TcpServer(addr, reuse_addr=true)
@@ -28,7 +36,7 @@ async test "authenticate with scram-sha-1 over loopback" {
     group.spawn_bg(() => {
       let (tcp, _) = server.accept()
       tcp.write(
-        "<?xml version='1.0'?><stream:stream from='example.com' id='sc1' version='1.0' xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'><stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>SCRAM-SHA-1</mechanism></mechanisms></stream:features>",
+        "<?xml version='1.0'?><stream:stream from='example.com' id='sc1' version='1.0' xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'><stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>\{mech}</mechanism></mechanisms></stream:features>",
       )
       let mut buf = ""
       for ;; {
@@ -42,7 +50,7 @@ async test "authenticate with scram-sha-1 over loopback" {
           }
         }
       }
-      assert_true(buf.contains("mechanism='SCRAM-SHA-1'"))
+      assert_true(buf.contains("mechanism='\{mech}'"))
       try {
         // extract the <auth> payload: gs2 "n,," + client-first-bare
         let auth_open = require_index(buf, "<auth")
@@ -80,22 +88,22 @@ async test "authenticate with scram-sha-1 over loopback" {
         let final_bare = final_msg[:p_idx].to_owned()
         let auth_message = "\{bare},\{server_first},\{final_bare}"
         let salted = @sasl.pbkdf2(
-          alg=@sasl.Sha1,
+          alg~,
           password=@utf8.encode("pencil"),
           salt~,
           iterations=4096,
         )
         let client_key = @sasl.hmac_bytes(
-          alg=@sasl.Sha1,
+          alg~,
           key=@sasl.fixed_to_bytes(salted),
           message=@utf8.encode("Client Key"),
         )
         let stored_key = @sasl.hash_bytes(
-          alg=@sasl.Sha1,
+          alg~,
           @sasl.fixed_to_bytes(client_key),
         )
         let client_signature = @sasl.hmac_bytes(
-          alg=@sasl.Sha1,
+          alg~,
           key=@sasl.fixed_to_bytes(stored_key),
           message=@utf8.encode(auth_message),
         )
@@ -105,12 +113,12 @@ async test "authenticate with scram-sha-1 over loopback" {
           Some(@base64.encode(@sasl.fixed_to_bytes(proof), padding=true)),
         )
         let server_key = @sasl.hmac_bytes(
-          alg=@sasl.Sha1,
+          alg~,
           key=@sasl.fixed_to_bytes(salted),
           message=@utf8.encode("Server Key"),
         )
         let server_signature = @sasl.hmac_bytes(
-          alg=@sasl.Sha1,
+          alg~,
           key=@sasl.fixed_to_bytes(server_key),
           message=@utf8.encode(auth_message),
         )
@@ -126,7 +134,7 @@ async test "authenticate with scram-sha-1 over loopback" {
       )
       tcp.close()
     })
-    let conn = @core.connect(host="127.0.0.1", port=46833)
+    let conn = @core.connect(host="127.0.0.1", port~)
     ignore(@core.Connection::open_stream(conn, domain="example.com"))
     let features = @core.Connection::authenticate(
       conn,
@@ -136,4 +144,14 @@ async test "authenticate with scram-sha-1 over loopback" {
     assert_true(features.bind)
     conn.close()
   })
+}
+
+///|
+async test "authenticate with scram-sha-1 over loopback" {
+  scram_loopback(alg=@sasl.Sha1, port=46833)
+}
+
+///|
+async test "authenticate with scram-sha-256 over loopback" {
+  scram_loopback(alg=@sasl.Sha256, port=46834)
 }
