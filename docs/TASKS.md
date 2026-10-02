@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1, T2, T3 completed (T3.1 through T3.3).
+> - As of 2026-10-01: T1 through T4 completed (T4.1 through T4.5).
 
 ## T1 Design and Foundations
 
@@ -100,18 +100,30 @@ validation follow RFC 7590.
 Goal: log in. Implement the mechanisms in order; later ones reuse the
 negotiation framework.
 
-- [ ] T4.1 SASL negotiation framework: mechanism selection, parsing
-      `challenge` / `response` / `success` / `failure`, stream restart on
-      success
-- [ ] T4.2 PLAIN (RFC 4616): only over an encrypted stream
-- [ ] T4.3 SCRAM-SHA-1 (RFC 5802): build the client-first and client-final
-      messages, verify the server-signature (needs HMAC, PBKDF2, and SHA-1
-      primitives; validate with the RFC 5802 test vectors)
-- [ ] T4.4 SCRAM-SHA-256 (RFC 7677): reuse the T4.3 framework with a
-      different hash
-- [ ] T4.5 (optional stretch) SCRAM channel binding (`-PLUS` variants) —
-      async/tls already exposes tls-unique and tls-server-end-point bindings
-      (RFC 5929), so the primitives exist
+- [x] T4.1 SASL negotiation framework: mechanism selection (SCRAM-SHA-256 >
+      SCRAM-SHA-1 > PLAIN, PLAIN gated on encryption), `sasl_auth` /
+      `sasl_respond` (also public API for custom mechanisms), and byte-wise
+      reading of challenge/success/failure so server bytes coalesced after
+      `</success>` survive the stream restart; §6.5 failure conditions
+      surface as `XmppError::Auth`
+- [x] T4.2 PLAIN (RFC 4616): `Connection::authenticate` auto-selects or takes
+      an explicit mechanism; PLAIN is refused on unencrypted streams, and the
+      happy path is tested end-to-end over a real TLS loopback upgrade
+- [x] T4.3 SCRAM-SHA-1 (RFC 5802): full client state machine in the sasl
+      package (HMAC per RFC 2104, PBKDF2/Hi, saslname escaping, server
+      signature verification) built on moonbitlang/x/crypto; validated
+      against the RFC 5802 §5.1 test vector and a loopback wire test with a
+      real proof-verifying fake server. SASL challenge/success payloads are
+      base64-decoded before parsing per RFC 6120 §6.4.2
+- [x] T4.4 SCRAM-SHA-256 (RFC 7677): reuses the T4.3 framework with the
+      SHA-256 algorithm; validated against the RFC 7677 §3 test vector and a
+      loopback wire test (both algorithms share one parametrized scenario)
+- [x] T4.5 SCRAM channel binding (`-PLUS` variants): `authenticate`
+      accepts `channel_binding~` — selection prefers -PLUS, the gs2 header
+      names tls-server-end-point, and the binding data is the SHA-256 of
+      the server certificate DER (RFC 5929). Covered by an offline c=
+      structural test, mechanism-preference tests, and a full TLS wire test
+      where the fake server asserts the bound c= value
 
 ## T5 Resource Binding (RFC 6120 §7)
 

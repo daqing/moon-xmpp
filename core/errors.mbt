@@ -2,6 +2,7 @@
 pub(all) suberror XmppError {
   ConnectionClosed
   Io(detail~ : String)
+  Auth(detail~ : String)
   StreamError(condition~ : StreamErrorCondition, text~ : String?)
   ProtocolViolation(detail~ : String)
 } derive(Eq, Debug)

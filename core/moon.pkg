@@ -1,16 +1,20 @@
 import {
+  "daqing/moon-xmpp/sasl",
   "daqing/moon-xmpp/xml",
   "moonbit-community/XMLParser",
   "moonbitlang/async/socket",
   "moonbitlang/async/tls",
   "moonbitlang/core/debug",
+  "moonbitlang/core/encoding/base64",
   "moonbitlang/core/encoding/utf8",
 }
 
 import {
+  "daqing/moon-xmpp/sasl",
   "moonbitlang/async",
   "moonbitlang/async/socket",
   "moonbitlang/async/tls",
+  "moonbitlang/core/encoding/base64",
   "moonbitlang/core/encoding/utf8",
 } for "test"
 
