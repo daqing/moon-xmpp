@@ -15,6 +15,12 @@ pub async fn Connection::authenticate(
     Some(f) => f
     None => raise XmppError::ProtocolViolation(detail="stream not open")
   }
+  if !(self.state is (Connecting | NegotiatingTls)) {
+    raise XmppError::ProtocolViolation(
+      detail="authentication already finished for this session",
+    )
+  }
+  self.state = Authenticating
   let chosen = match mechanism {
     Some(m) => {
       if !contains(advertised.mechanisms, m) {

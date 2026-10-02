@@ -2,6 +2,7 @@
 package "daqing/moon-xmpp/core"
 
 import {
+  "daqing/moon-xmpp/jid",
   "daqing/moon-xmpp/xml",
   "moonbit-community/XMLParser",
   "moonbitlang/core/debug",
@@ -10,7 +11,7 @@ import {
 // Values
 pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError
 
-pub fn select_mechanism(features~ : Features, encrypted~ : Bool) -> String?
+pub fn select_mechanism(features~ : Features, encrypted~ : Bool, channel_binding? : Bool) -> String?
 
 // Errors
 pub(all) suberror SaslFailureCondition {
@@ -113,7 +114,9 @@ pub fn ByteStream::reset(Self) -> Unit
 pub struct Connection {
   // private fields
 }
-pub async fn Connection::authenticate(Self, jid~ : String, password~ : String, mechanism? : String?) -> Features raise XmppError
+pub async fn Connection::authenticate(Self, jid~ : String, password~ : String, mechanism? : String?, channel_binding? : Bool) -> Features raise XmppError
+pub async fn Connection::bind_resource(Self, resource? : String) -> @jid.Jid raise XmppError
+pub fn Connection::bound_jid(Self) -> @jid.Jid?
 pub fn Connection::close(Self) -> Unit
 pub fn Connection::is_closed(Self) -> Bool
 pub fn Connection::is_encrypted(Self) -> Bool
@@ -124,7 +127,19 @@ pub async fn Connection::sasl_auth(Self, mechanism~ : String, initial~ : String)
 pub async fn Connection::sasl_respond(Self, payload~ : String) -> SaslReply raise XmppError
 pub async fn Connection::send_raw(Self, String) -> Unit raise XmppError
 pub async fn Connection::starttls(Self, domain~ : String, verify? : Bool) -> Features raise XmppError
+pub fn Connection::state(Self) -> ConnectionState
 pub fn Connection::stream_id(Self) -> String?
+
+pub(all) enum ConnectionState {
+  Connecting
+  NegotiatingTls
+  Authenticating
+  Bound
+  Online
+} derive(Eq, @debug.Debug)
+pub fn ConnectionState::equal(Self, Self) -> Bool
+pub fn ConnectionState::not_equal(Self, Self) -> Bool
+pub fn ConnectionState::to_repr(Self) -> @debug.Repr
 
 pub struct Features {
   starttls : Bool
