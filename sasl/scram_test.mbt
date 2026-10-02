@@ -161,3 +161,69 @@ test "saslname escaping" {
   assert_eq(first, "n,,n=u=3Ds=2Cer,r=fyko+d2lbbFgONRv9qkxdawL")
   let _ = client
 }
+
+///|
+test "challenge without required attributes raises" {
+  let nonce = @base64.decode("fyko+d2lbbFgONRv9qkxdawL")
+  let mk = fn() -> @sasl.ScramClient {
+    match
+      @sasl.ScramClient::start(
+        alg=@sasl.Sha1,
+        username="user",
+        password="pencil",
+        nonce~,
+        gs2="n",
+        cb_data=b"",
+      ) {
+      (c, _) => c
+    }
+  }
+  try mk().client_final(server_first="s=QSXCR+Q6sek8bf92,i=4096") catch {
+    err => assert_true(err is @sasl.SaslError::InvalidChallenge(detail=_))
+  } noraise {
+    _ => fail("expected failure")
+  }
+  try
+    mk().client_final(server_first="r=fyko+d2lbbFgONRv9qkxdawLx,i=4096")
+  catch {
+    err => assert_true(err is @sasl.SaslError::InvalidChallenge(detail=_))
+  } noraise {
+    _ => fail("expected failure")
+  }
+  try
+    mk().client_final(
+      server_first="r=fyko+d2lbbFgONRv9qkxdawLx,s=QSXCR+Q6sek8bf92",
+    )
+  catch {
+    err => assert_true(err is @sasl.SaslError::InvalidChallenge(detail=_))
+  } noraise {
+    _ => fail("expected failure")
+  }
+  try
+    mk().client_final(
+      server_first="r=fyko+d2lbbFgONRv9qkxdawLx,s=!!!notbase64!!!,i=4096",
+    )
+  catch {
+    err => assert_true(err is @sasl.SaslError::InvalidChallenge(detail=_))
+  } noraise {
+    _ => fail("expected failure")
+  }
+  try
+    mk().client_final(
+      server_first="r=fyko+d2lbbFgONRv9qkxdawLx,s=QSXCR+Q6sek8bf92,i=zero",
+    )
+  catch {
+    err => assert_true(err is @sasl.SaslError::InvalidChallenge(detail=_))
+  } noraise {
+    _ => fail("expected failure")
+  }
+  try
+    mk().client_final(
+      server_first="r=fyko+d2lbbFgONRv9qkxdawLx,s=QSXCR+Q6sek8bf92,i=0",
+    )
+  catch {
+    err => assert_true(err is @sasl.SaslError::InvalidChallenge(detail=_))
+  } noraise {
+    _ => fail("expected failure")
+  }
+}
