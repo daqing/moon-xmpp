@@ -1,0 +1,4 @@
+alice (slixmpp) online
+[bob@localhost/1ksr0k8upfq_] Hello from MoonBit!
+Task was destroyed but it is pending!
+task: <Task cancelling name='Task-1' coro=<XMLStream.run_filters() running at /usr/local/lib/python3.12/site-packages/slixmpp/xmlstream/xmlstream.py:1280> wait_for=<Future cancelled>>

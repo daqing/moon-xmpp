@@ -1,0 +1,49 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "daqing/moon-xmpp/sasl"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn fixed_to_bytes(FixedArray[Byte]) -> Bytes
+
+pub fn hash_bytes(alg~ : ScramAlg, Bytes) -> FixedArray[Byte]
+
+pub fn hmac_bytes(alg~ : ScramAlg, key~ : Bytes, message~ : Bytes) -> FixedArray[Byte]
+
+pub fn pbkdf2(alg~ : ScramAlg, password~ : Bytes, salt~ : Bytes, iterations~ : Int) -> FixedArray[Byte]
+
+pub fn plain(authcid~ : String, password~ : String, authzid? : String) -> String raise SaslError
+
+pub fn xor_fixed(FixedArray[Byte], FixedArray[Byte]) -> FixedArray[Byte]
+
+// Errors
+pub(all) suberror SaslError {
+  InvalidState(detail~ : String)
+  InvalidChallenge(detail~ : String)
+  AuthenticationFailed(detail~ : String)
+} derive(Eq, @debug.Debug)
+pub fn SaslError::equal(Self, Self) -> Bool
+pub fn SaslError::not_equal(Self, Self) -> Bool
+pub fn SaslError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+pub(all) enum ScramAlg {
+  Sha1
+  Sha256
+} derive(Eq, @debug.Debug)
+pub fn ScramAlg::equal(Self, Self) -> Bool
+pub fn ScramAlg::not_equal(Self, Self) -> Bool
+pub fn ScramAlg::to_repr(Self) -> @debug.Repr
+
+pub struct ScramClient {
+  // private fields
+}
+pub fn ScramClient::client_final(Self, server_first~ : String) -> String raise SaslError
+pub fn ScramClient::start(alg~ : ScramAlg, username~ : String, password~ : String, nonce~ : Bytes, gs2~ : String, cb_data~ : Bytes) -> (Self, String)
+pub fn ScramClient::verify_server_final(Self, server_final~ : String) -> Unit raise SaslError
+
+// Type aliases
+
+// Traits

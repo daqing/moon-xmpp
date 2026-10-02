@@ -1,0 +1,208 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "daqing/moon-xmpp/core"
+
+import {
+  "daqing/moon-xmpp/jid",
+  "daqing/moon-xmpp/xml",
+  "moonbit-community/XMLParser",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError
+
+pub fn select_mechanism(features~ : Features, encrypted~ : Bool, channel_binding? : Bool) -> String?
+
+// Errors
+pub(all) suberror SaslFailureCondition {
+  Aborted
+  AccountDisabled
+  CredentialsExpired
+  EncryptionRequired
+  IncorrectEncoding
+  InvalidAuthzid
+  InvalidCredential
+  InvalidMechanism
+  InvalidSaslState
+  NotAuthorized
+  PolicyViolation
+  TemporaryAuthFailure
+  Unknown(String)
+} derive(Eq, @debug.Debug)
+pub fn SaslFailureCondition::equal(Self, Self) -> Bool
+pub fn SaslFailureCondition::not_equal(Self, Self) -> Bool
+pub fn SaslFailureCondition::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror StanzaErrorCondition {
+  BadRequest
+  Conflict
+  FeatureNotImplemented
+  Forbidden
+  Gone
+  InternalServerError
+  ItemNotFound
+  JidMalformed
+  NotAcceptable
+  NotAllowed
+  NotAuthorized
+  PolicyViolation
+  RecipientUnavailable
+  Redirect(uri~ : String)
+  RegistrationRequired
+  RemoteServerNotFound
+  RemoteServerTimeout
+  ResourceConstraint
+  ServiceUnavailable
+  SubscriptionRequired
+  UndefinedCondition
+  UnexpectedRequest
+  Unknown(String)
+} derive(Eq, @debug.Debug)
+pub fn StanzaErrorCondition::equal(Self, Self) -> Bool
+pub fn StanzaErrorCondition::not_equal(Self, Self) -> Bool
+pub fn StanzaErrorCondition::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror StreamErrorCondition {
+  BadFormat
+  BadNamespacePrefix
+  Conflict
+  ConnectionTimeout
+  HostGone
+  HostUnknown
+  ImproperAddressing
+  InternalServerError
+  InvalidFrom
+  InvalidNamespace
+  InvalidXml
+  NotAuthorized
+  PolicyViolation
+  RemoteConnectionFailed
+  Reset
+  ResourceConstraint
+  RestrictedXml
+  SeeOtherHost(host~ : String)
+  SystemShutdown
+  UndefinedCondition
+  UnsupportedEncoding
+  UnsupportedStanzaType
+  UnsupportedVersion
+  Unknown(String)
+} derive(Eq, @debug.Debug)
+pub fn StreamErrorCondition::equal(Self, Self) -> Bool
+pub fn StreamErrorCondition::not_equal(Self, Self) -> Bool
+pub fn StreamErrorCondition::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror XmppError {
+  ConnectionClosed
+  Io(detail~ : String)
+  Auth(detail~ : String)
+  StreamError(condition~ : StreamErrorCondition, text~ : String?)
+  ProtocolViolation(detail~ : String)
+} derive(Eq, @debug.Debug)
+pub fn XmppError::equal(Self, Self) -> Bool
+pub fn XmppError::not_equal(Self, Self) -> Bool
+pub fn XmppError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+pub struct ByteStream {
+  // private fields
+}
+pub fn ByteStream::new() -> Self
+pub fn ByteStream::push_bytes(Self, Bytes) -> Array[@xml.Frame] raise @xml.XmlError
+pub fn ByteStream::reset(Self) -> Unit
+
+pub struct Connection {
+  // private fields
+}
+pub async fn Connection::authenticate(Self, jid~ : String, password~ : String, mechanism? : String?, channel_binding? : Bool) -> Features raise XmppError
+pub async fn Connection::bind_resource(Self, resource? : String) -> @jid.Jid raise XmppError
+pub fn Connection::bound_jid(Self) -> @jid.Jid?
+pub fn Connection::close(Self) -> Unit
+pub fn Connection::is_closed(Self) -> Bool
+pub fn Connection::is_encrypted(Self) -> Bool
+pub async fn Connection::open_stream(Self, domain~ : String) -> Features raise XmppError
+pub async fn Connection::read_raw_element(Self) -> String raise XmppError
+pub async fn Connection::recv_presence(Self) -> Presence raise XmppError
+pub async fn Connection::restart_stream(Self, domain~ : String) -> Features raise XmppError
+pub async fn Connection::sasl_auth(Self, mechanism~ : String, initial~ : String) -> SaslReply raise XmppError
+pub async fn Connection::sasl_respond(Self, payload~ : String) -> SaslReply raise XmppError
+pub async fn Connection::send_chat(Self, to~ : String, body~ : String) -> String raise XmppError
+pub async fn Connection::send_initial_presence(Self) -> Unit raise XmppError
+pub async fn Connection::send_raw(Self, String) -> Unit raise XmppError
+pub async fn Connection::signoff(Self) -> Unit raise XmppError
+pub async fn Connection::starttls(Self, domain~ : String, verify? : Bool) -> Features raise XmppError
+pub fn Connection::state(Self) -> ConnectionState
+pub fn Connection::stream_id(Self) -> String?
+
+pub(all) enum ConnectionState {
+  Connecting
+  NegotiatingTls
+  Authenticating
+  Bound
+  Online
+} derive(Eq, @debug.Debug)
+pub fn ConnectionState::equal(Self, Self) -> Bool
+pub fn ConnectionState::not_equal(Self, Self) -> Bool
+pub fn ConnectionState::to_repr(Self) -> @debug.Repr
+
+pub struct Features {
+  starttls : Bool
+  starttls_required : Bool
+  mechanisms : Array[String]
+  bind : Bool
+} derive(Eq, @debug.Debug)
+pub fn Features::equal(Self, Self) -> Bool
+pub fn Features::not_equal(Self, Self) -> Bool
+pub fn Features::to_repr(Self) -> @debug.Repr
+
+pub struct Presence {
+  from : @jid.Jid?
+  presence_type : String?
+  status : String?
+} derive(Eq, @debug.Debug)
+pub fn Presence::equal(Self, Self) -> Bool
+pub fn Presence::not_equal(Self, Self) -> Bool
+pub fn Presence::to_repr(Self) -> @debug.Repr
+
+pub(all) enum SaslReply {
+  Challenge(String)
+  Success(String)
+} derive(Eq, @debug.Debug)
+pub fn SaslReply::equal(Self, Self) -> Bool
+pub fn SaslReply::not_equal(Self, Self) -> Bool
+pub fn SaslReply::to_repr(Self) -> @debug.Repr
+
+pub struct StanzaError {
+  error_type : StanzaErrorType
+  condition : StanzaErrorCondition
+  text : String?
+} derive(Eq, @debug.Debug)
+pub fn StanzaError::equal(Self, Self) -> Bool
+pub fn StanzaError::not_equal(Self, Self) -> Bool
+pub fn StanzaError::parse(@XMLParser.XMLElement) -> Self raise XmppError
+pub fn StanzaError::to_repr(Self) -> @debug.Repr
+
+pub(all) enum StanzaErrorType {
+  Auth
+  Cancel
+  Continue
+  Modify
+  Wait
+  Unknown(String)
+} derive(Eq, @debug.Debug)
+pub fn StanzaErrorType::equal(Self, Self) -> Bool
+pub fn StanzaErrorType::not_equal(Self, Self) -> Bool
+pub fn StanzaErrorType::to_repr(Self) -> @debug.Repr
+
+pub struct StreamHeader {
+  id : String
+  from : String?
+  version : String
+} derive(Eq, @debug.Debug)
+pub fn StreamHeader::equal(Self, Self) -> Bool
+pub fn StreamHeader::not_equal(Self, Self) -> Bool
+pub fn StreamHeader::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

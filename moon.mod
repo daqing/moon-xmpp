@@ -11,7 +11,7 @@
 
 name = "daqing/moon-xmpp"
 
-version = "0.1.0"
+version = "0.9.5"
 
 readme = "README.mbt.md"
 
@@ -24,3 +24,10 @@ keywords = [ "xmpp" ]
 preferred_target = "native"
 
 description = "An XMPP client library for MoonBit"
+
+import {
+  "moonbit-community/XMLParser@0.2.6",
+  "moonbit-community/unicode@0.5.2",
+  "moonbitlang/async@0.22.4",
+  "moonbitlang/x@0.5.5",
+}

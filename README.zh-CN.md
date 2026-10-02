@@ -1,5 +1,121 @@
 # moon-xmpp
 
-一个用 MoonBit 编写的 XMPP 客户端库。
+MoonBit 的 XMPP 客户端库，实现 XMPP Core（[RFC 6120](https://www.rfc-editor.org/rfc/rfc6120)）与 XMPP IM（[RFC 6121](https://www.rfc-editor.org/rfc/rfc6121)）的客户端侧协议。
 
-> 仓库地址：https://github.com/daqing/moon-xmpp — 授权协议：MIT
+## 项目状态
+
+**开发中。** moon-xmpp 是一个 MoonBit 黑客松参赛项目。核心会话生命周期（流、STARTTLS、SASL、绑定、presence、聊天）已实现，有 100+ 测试覆盖，并在真实本地 XMPP 服务器上完成集成验证（见 `scripts/e2e.sh`）；剩余步骤是与 GUI 客户端的互操作实测——见下文「路线图」与 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)。
+
+## 它做什么
+
+moon-xmpp 让 MoonBit 程序能够连接 ejabberd 这类标准 XMPP 服务器，安全登录，并收发一对一聊天消息；消息可与 Psi、Gajim、Conversations 等现成客户端互通。
+
+本项目的验收场景：
+
+1. moon-xmpp 连接一台 ejabberd 服务器，完成 STARTTLS 加密、SASL 认证与资源绑定。
+2. 向另一个账号发送聊天消息，消息在第三方客户端中实时到达。
+3. 从该客户端回复的消息，能够被 moon-xmpp 收到。
+
+## 协议覆盖
+
+| 能力 | 标准 | 状态 |
+| --- | --- | --- |
+| XML 流 | [RFC 6120 §4](https://www.rfc-editor.org/rfc/rfc6120#section-4) | 已完成 |
+| STARTTLS | [RFC 6120 §5](https://www.rfc-editor.org/rfc/rfc6120#section-5) | 已完成 |
+| SASL：PLAIN、SCRAM-SHA-1、SCRAM-SHA-256 | [RFC 4422](https://www.rfc-editor.org/rfc/rfc4422)、[RFC 4616](https://www.rfc-editor.org/rfc/rfc4616)、[RFC 5802](https://www.rfc-editor.org/rfc/rfc5802)、[RFC 7677](https://www.rfc-editor.org/rfc/rfc7677) | 已完成 |
+| 资源绑定 | [RFC 6120 §7](https://www.rfc-editor.org/rfc/rfc6120#section-7) | 已完成 |
+| 初始 presence | [RFC 6121 §4.2](https://www.rfc-editor.org/rfc/rfc6121#section-4.2) | 已完成 |
+| 聊天消息 | [RFC 6120 §8](https://www.rfc-editor.org/rfc/rfc6120#section-8)、[RFC 6121 §5.2](https://www.rfc-editor.org/rfc/rfc6121#section-5.2) | 已完成 |
+| JID 解析与规范化 | [RFC 8264](https://www.rfc-editor.org/rfc/rfc8264) | 已完成 |
+
+## 范围之外
+
+- roster 与 presence 订阅管理（RFC 6121 §2–3）：暂不实现，核心链路打通后再评估。
+- 各类 XEP 扩展，如 SASL2（XEP-0388）、Stream Management（XEP-0198）、Message Carbons（XEP-0280）、MAM（XEP-0313）。
+- 服务器到服务器（s2s）互联及一切服务端功能——这是纯客户端库。
+
+## 安装
+
+```
+moon add daqing/moon-xmpp
+```
+
+然后在你包的 `moon.pkg` 中导入：
+
+```
+import {
+  "daqing/moon-xmpp" @xmpp,
+}
+```
+
+## 用法
+
+> API 基于 [moonbitlang/async](https://mooncakes.io/docs/moonbitlang/async)。MoonBit 没有 `await` 关键字——async 调用与普通调用写法一致，错误隐式传播（会抛 `XmppError` 的函数需在可传播错误的上下文中调用）。
+
+```moonbit nocheck
+///|
+async fn main {
+  let conn = @xmpp.connect(host="example.com", port=5222)
+  conn.open_stream(domain="example.com")
+  ignore(conn.starttls(domain="example.com"))
+  ignore(conn.authenticate(jid="alice@example.com", password="secret"))
+  ignore(conn.bind_resource(resource="laptop"))
+  conn.send_initial_presence()
+  let id = conn.send_chat(to="bob@example.com", body="Hello from MoonBit!")
+  let stanza = conn.recv_stanza() // Chat / Presence / Other
+}
+```
+
+## 演示
+
+`cmd/main` 下有一个小型命令行客户端：
+
+```bash
+git clone https://github.com/daqing/moon-xmpp
+cd moon-xmpp
+moon run cmd/main -- \
+  --jid alice@example.com \
+  --password '…' \
+  --to bob@example.com \
+  --body 'Hello from MoonBit!'
+```
+
+它会建立连接（默认 STARTTLS，可用 `--host`/`--port` 覆盖）、登录、绑定资源、上线、发送消息，然后持续打印收到的消息与 presence 广播，直到流结束。用标准客户端（Psi、Gajim、Conversations）登录 `bob@example.com`，消息会立刻到达；从该客户端发送回复，正在运行的 CLI 也会打印出来。
+
+## 路线图
+
+1. [x] XML 流协商 — RFC 6120 §4
+2. [x] STARTTLS — RFC 6120 §5
+3. [x] SASL 认证：PLAIN、SCRAM-SHA-1、SCRAM-SHA-256
+4. [x] 资源绑定 — RFC 6120 §7
+5. [x] 初始 presence — RFC 6121 §4.2
+6. [x] 聊天消息收发 — RFC 6120 §8、RFC 6121 §5.2
+7. [x] `cmd/main` 命令行演示
+
+## 开发
+
+需要 [MoonBit 工具链](https://docs.moonbitlang.com)（`moon`）。目标后端为 native。
+
+```bash
+moon build   # 构建所有包（native 目标）
+moon test    # 运行测试
+moon fmt     # 格式化代码
+moon info    # 重新生成包接口
+```
+
+集成测试对本地 XMPP 服务器运行：
+
+```bash
+scripts/prosody.sh start                    # x86 主机可用 scripts/ejabberd.sh
+scripts/prosody.sh register alice secret123
+scripts/prosody.sh register bob secret123
+scripts/e2e.sh                              # 双向送达测试
+```
+
+## 许可证
+
+[MIT](LICENSE)
+
+---
+
+[English](README.md)
