@@ -36,6 +36,9 @@ pub async fn Connection::authenticate(
       }
       self.sasl_auth(mechanism="PLAIN", initial=payload)
     }
+    "SCRAM-SHA-1" => self.scram_exchange(mech, alg=@sasl.Sha1, jid~, password~)
+    "SCRAM-SHA-256" =>
+      self.scram_exchange(mech, alg=@sasl.Sha256, jid~, password~)
     other => raise XmppError::Auth(detail="mechanism not implemented: \{other}")
   }
   match reply {
@@ -52,6 +55,69 @@ pub async fn Connection::authenticate(
       }
   }
   self.restart_stream(domain=self.domain())
+}
+
+///|
+/// Run a SCRAM exchange for `mech` ("SCRAM-SHA-1" or "SCRAM-SHA-256")
+/// without channel binding, and return the server's final message.
+#warnings("-alert_internal")
+async fn Connection::scram_exchange(
+  self : Connection,
+  mech : String,
+  alg~ : @sasl.ScramAlg,
+  jid~ : String,
+  password~ : String,
+) -> SaslReply raise XmppError {
+  let nonce = @tls.rand_bytes(18) catch {
+    err => raise XmppError::Io(detail="nonce generation failed: \{Repr(err)}")
+  }
+  let (client, first) = @sasl.ScramClient::start(
+    alg~,
+    username=jid,
+    password~,
+    nonce~,
+    gs2="n",
+    cb_data=b"",
+  )
+  let mut reply = self.sasl_auth(mechanism=mech, initial=first)
+  for ;; {
+    let text = match reply {
+      Challenge(encoded) => decode_sasl_payload(encoded)
+      Success(encoded) => decode_sasl_payload(encoded)
+    }
+    match reply {
+      Challenge(_) => {
+        let final_msg = client.client_final(server_first=text) catch {
+          err => raise XmppError::Auth(detail="\{Repr(err)}")
+        }
+        reply = self.sasl_respond(payload=final_msg)
+      }
+      Success(_) => {
+        client.verify_server_final(server_final=text) catch {
+          err => raise XmppError::Auth(detail="\{Repr(err)}")
+        }
+        return reply
+      }
+    }
+  }
+}
+
+///|
+/// RFC 6120 §6.4.2 carries SASL payloads base64-encoded inside the
+/// challenge/response/success elements.
+fn decode_sasl_payload(encoded : String) -> String raise XmppError {
+  if encoded is "" {
+    return ""
+  }
+  let bytes = @base64.decode(encoded) catch {
+    _ =>
+      raise XmppError::ProtocolViolation(
+        detail="bad base64 in SASL reply: \{Repr(encoded)}",
+      )
+  }
+  @utf8.decode(bytes) catch {
+    _ => raise XmppError::ProtocolViolation(detail="bad utf-8 in SASL reply")
+  }
 }
 
 ///|

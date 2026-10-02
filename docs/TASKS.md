@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1, T2, T3 completed; T4.1 through T4.2 completed.
+> - As of 2026-10-01: T1, T2, T3 completed; T4.1 through T4.3 completed.
 
 ## T1 Design and Foundations
 
@@ -109,9 +109,12 @@ negotiation framework.
 - [x] T4.2 PLAIN (RFC 4616): `Connection::authenticate` auto-selects or takes
       an explicit mechanism; PLAIN is refused on unencrypted streams, and the
       happy path is tested end-to-end over a real TLS loopback upgrade
-- [ ] T4.3 SCRAM-SHA-1 (RFC 5802): build the client-first and client-final
-      messages, verify the server-signature (needs HMAC, PBKDF2, and SHA-1
-      primitives; validate with the RFC 5802 test vectors)
+- [x] T4.3 SCRAM-SHA-1 (RFC 5802): full client state machine in the sasl
+      package (HMAC per RFC 2104, PBKDF2/Hi, saslname escaping, server
+      signature verification) built on moonbitlang/x/crypto; validated
+      against the RFC 5802 §5.1 test vector and a loopback wire test with a
+      real proof-verifying fake server. SASL challenge/success payloads are
+      base64-decoded before parsing per RFC 6120 §6.4.2
 - [ ] T4.4 SCRAM-SHA-256 (RFC 7677): reuse the T4.3 framework with a
       different hash
 - [ ] T4.5 (optional stretch) SCRAM channel binding (`-PLUS` variants) —
