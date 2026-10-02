@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1, T2, T3 completed; T4.1 through T4.4 completed.
+> - As of 2026-10-01: T1 through T4 completed (T4.1 through T4.5).
 
 ## T1 Design and Foundations
 
@@ -118,9 +118,12 @@ negotiation framework.
 - [x] T4.4 SCRAM-SHA-256 (RFC 7677): reuses the T4.3 framework with the
       SHA-256 algorithm; validated against the RFC 7677 §3 test vector and a
       loopback wire test (both algorithms share one parametrized scenario)
-- [ ] T4.5 (optional stretch) SCRAM channel binding (`-PLUS` variants) —
-      async/tls already exposes tls-unique and tls-server-end-point bindings
-      (RFC 5929), so the primitives exist
+- [x] T4.5 SCRAM channel binding (`-PLUS` variants): `authenticate`
+      accepts `channel_binding~` — selection prefers -PLUS, the gs2 header
+      names tls-server-end-point, and the binding data is the SHA-256 of
+      the server certificate DER (RFC 5929). Covered by an offline c=
+      structural test, mechanism-preference tests, and a full TLS wire test
+      where the fake server asserts the bound c= value
 
 ## T5 Resource Binding (RFC 6120 §7)
 

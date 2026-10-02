@@ -38,10 +38,17 @@ pub extend SaslFailureCondition with @moonbitlang/core/debug.Debug::{to_repr}
 ///|
 /// Pick the best mechanism the server offers: SCRAM-SHA-256, then
 /// SCRAM-SHA-1, then PLAIN. PLAIN is only usable on an encrypted stream.
-pub fn select_mechanism(features~ : Features, encrypted~ : Bool) -> String? {
-  let preferred = [
-    "SCRAM-SHA-256", "SCRAM-SHA-1", "SCRAM-SHA-256-PLUS", "SCRAM-SHA-1-PLUS", "PLAIN",
-  ]
+/// With `channel_binding`, -PLUS variants are preferred over plain SCRAM.
+pub fn select_mechanism(
+  features~ : Features,
+  encrypted~ : Bool,
+  channel_binding? : Bool = false,
+) -> String? {
+  let preferred = if channel_binding {
+    ["SCRAM-SHA-256-PLUS", "SCRAM-SHA-1-PLUS", "SCRAM-SHA-256", "SCRAM-SHA-1"]
+  } else {
+    ["SCRAM-SHA-256", "SCRAM-SHA-1", "PLAIN"]
+  }
   let mut best : String? = None
   let mut best_rank = preferred.length()
   for m in features.mechanisms {

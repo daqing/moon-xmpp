@@ -5,7 +5,7 @@
 > - 编号规则：`T<阶段>.<序号>`，阶段内顺序即建议实施顺序。
 > - 进度规则：每完成一项就勾选；完成协议能力相关的任务后，同步更新 README（中英两份）的协议覆盖表状态与 Roadmap 复选框。
 > - 依赖关系：T1 → T2 → … → T8 依次依赖；**T9.1（本地 ejabberd 环境）建议提前到 T2 开始前完成**，因为从流协商起就需要真实服务器联调。JID、XML、SCRAM 等纯计算任务不依赖服务器，可随时穿插进行。
-> - 截至 2026-10-01：T1、T2、T3 已完成，T4.1 至 T4.4 已完成。
+> - 截至 2026-10-01：T1 至 T4 已完成（T4.1 至 T4.5）。
 
 ## T1 设计与基础
 
@@ -43,7 +43,7 @@
 - [x] T4.2 PLAIN（RFC 4616）：`Connection::authenticate` 自动选择机制或接受显式指定；明文流上拒绝 PLAIN；正常路径经真实 TLS 回环升级端到端测试
 - [x] T4.3 SCRAM-SHA-1（RFC 5802）：sasl 包内完整客户端状态机（RFC 2104 HMAC、PBKDF2/Hi、saslname 转义、server-signature 校验），基于 moonbitlang/x/crypto；用 RFC 5802 §5.1 测试向量和带真实 proof 校验的回环线上测试验证；SASL challenge/success 载荷按 RFC 6120 §6.4.2 先 base64 解码再解析
 - [x] T4.4 SCRAM-SHA-256（RFC 7677）：复用 T4.3 框架换 SHA-256 算法；用 RFC 7677 §3 测试向量和回环线上测试验证（两种算法共用一个参数化场景）
-- [ ] T4.5（可选加分）SCRAM channel binding（`-PLUS` 变体）——async/tls 已提供 tls-unique 与 tls-server-end-point 绑定（RFC 5929），原语现成
+- [x] T4.5 SCRAM channel binding（`-PLUS` 变体）：`authenticate` 接受 `channel_binding~`——选择时优先 -PLUS，gs2 头标注 tls-server-end-point，绑定数据为服务器证书 DER 的 SHA-256（RFC 5929）。覆盖：c= 结构离线测试、机制偏好测试、以及假服务器断言 c= 绑定值的完整 TLS 线上测试
 
 ## T5 资源绑定（RFC 6120 §7）
 

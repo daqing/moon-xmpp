@@ -43,6 +43,42 @@ test "rfc7677 sha-256 vector" {
 }
 
 ///|
+test "channel binding gs2 lands in first and c=" {
+  let cb : Bytes = b"\x01\x02\x03\x04"
+  let nonce = @base64.decode("fyko+d2lbbFgONRv9qkxdawL")
+  let (client, first) = @sasl.ScramClient::start(
+    alg=@sasl.Sha256,
+    username="user",
+    password="pencil",
+    nonce~,
+    gs2="p=tls-server-end-point",
+    cb_data=cb,
+  )
+  assert_eq(first, "p=tls-server-end-point,,n=user,r=fyko+d2lbbFgONRv9qkxdawL")
+  let server_first = "r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,s=QSXCR+Q6sek8bf92,i=4096"
+  let final_msg = client.client_final(server_first~)
+  let raw : Array[Byte] = []
+  for b in @utf8.encode("p=tls-server-end-point,,") {
+    raw.push(b)
+  }
+  for b in cb {
+    raw.push(b)
+  }
+  let expected_c = @base64.encode(Bytes::from_array(raw), padding=true)
+  assert_eq(test_c_value(final_msg), Some(expected_c))
+}
+
+///|
+fn test_c_value(final_msg : String) -> String? {
+  for part in final_msg.split(",") {
+    if part.has_prefix("c=") {
+      return Some(part["c=".length():].to_owned())
+    }
+  }
+  None
+}
+
+///|
 test "rejects bad server signature" {
   let nonce = @base64.decode("fyko+d2lbbFgONRv9qkxdawL")
   let (client, _) = @sasl.ScramClient::start(

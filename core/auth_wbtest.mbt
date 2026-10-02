@@ -47,8 +47,24 @@ test "select_mechanism handles unknown mechanisms" {
     mechanisms: ["X-OAUTH", "SCRAM-SHA-1-PLUS"],
     bind: false,
   }
+  assert_eq(select_mechanism(features=f2, encrypted=true), None)
   assert_eq(
-    select_mechanism(features=f2, encrypted=true),
+    select_mechanism(features=f2, encrypted=true, channel_binding=true),
     Some("SCRAM-SHA-1-PLUS"),
+  )
+}
+
+///|
+test "select_mechanism prefers plus when binding requested" {
+  let f = {
+    starttls: false,
+    starttls_required: false,
+    mechanisms: ["SCRAM-SHA-256", "SCRAM-SHA-256-PLUS"],
+    bind: false,
+  }
+  assert_eq(select_mechanism(features=f, encrypted=true), Some("SCRAM-SHA-256"))
+  assert_eq(
+    select_mechanism(features=f, encrypted=true, channel_binding=true),
+    Some("SCRAM-SHA-256-PLUS"),
   )
 }

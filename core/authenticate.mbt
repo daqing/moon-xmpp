@@ -1,13 +1,15 @@
 ///|
 /// Authenticate with the server (RFC 6120 §6) and restart the stream.
 /// With no explicit mechanism the best advertised one is selected
-/// (SCRAM-SHA-256, SCRAM-SHA-1, then PLAIN). PLAIN is refused on
-/// unencrypted streams.
+/// (SCRAM-SHA-256, SCRAM-SHA-1, then PLAIN; -PLUS variants first when
+/// `channel_binding` is set). PLAIN is refused on unencrypted streams.
+/// Channel binding uses tls-server-end-point (RFC 5929).
 pub async fn Connection::authenticate(
   self : Connection,
   jid~ : String,
   password~ : String,
   mechanism? : String? = None,
+  channel_binding? : Bool = false,
 ) -> Features raise XmppError {
   let advertised = match self.features {
     Some(f) => f
@@ -20,7 +22,12 @@ pub async fn Connection::authenticate(
       }
       Some(m)
     }
-    None => select_mechanism(features=advertised, encrypted=self.is_encrypted())
+    None =>
+      select_mechanism(
+        features=advertised,
+        encrypted=self.is_encrypted(),
+        channel_binding~,
+      )
   }
   let mech = match chosen {
     Some(m) => m
@@ -36,9 +43,14 @@ pub async fn Connection::authenticate(
       }
       self.sasl_auth(mechanism="PLAIN", initial=payload)
     }
-    "SCRAM-SHA-1" => self.scram_exchange(mech, alg=@sasl.Sha1, jid~, password~)
+    "SCRAM-SHA-1" =>
+      self.scram_exchange(mech, alg=@sasl.Sha1, jid~, password~, plus=false)
     "SCRAM-SHA-256" =>
-      self.scram_exchange(mech, alg=@sasl.Sha256, jid~, password~)
+      self.scram_exchange(mech, alg=@sasl.Sha256, jid~, password~, plus=false)
+    "SCRAM-SHA-1-PLUS" =>
+      self.scram_exchange(mech, alg=@sasl.Sha1, jid~, password~, plus=true)
+    "SCRAM-SHA-256-PLUS" =>
+      self.scram_exchange(mech, alg=@sasl.Sha256, jid~, password~, plus=true)
     other => raise XmppError::Auth(detail="mechanism not implemented: \{other}")
   }
   match reply {
@@ -67,17 +79,29 @@ async fn Connection::scram_exchange(
   alg~ : @sasl.ScramAlg,
   jid~ : String,
   password~ : String,
+  plus~ : Bool,
 ) -> SaslReply raise XmppError {
   let nonce = @tls.rand_bytes(18) catch {
     err => raise XmppError::Io(detail="nonce generation failed: \{Repr(err)}")
+  }
+  let (gs2, cb_data) : (String, Bytes) = if plus {
+    if !self.is_encrypted() {
+      raise XmppError::Auth(
+        detail="channel binding requires an encrypted stream",
+      )
+    }
+    let cb = self.server_end_point_binding()
+    ("p=tls-server-end-point", cb)
+  } else {
+    ("n", b"")
   }
   let (client, first) = @sasl.ScramClient::start(
     alg~,
     username=jid,
     password~,
     nonce~,
-    gs2="n",
-    cb_data=b"",
+    gs2~,
+    cb_data~,
   )
   let mut reply = self.sasl_auth(mechanism=mech, initial=first)
   for ;; {
@@ -99,6 +123,34 @@ async fn Connection::scram_exchange(
         return reply
       }
     }
+  }
+}
+
+///|
+/// The tls-server-end-point channel binding data (RFC 5929): the SHA-256
+/// hash of the server certificate in DER form. For modern certificates the
+/// signature hash is SHA-256 anyway; MD5/SHA-1 certs also map to SHA-256.
+#warnings("-alert_internal")
+fn Connection::server_end_point_binding(
+  self : Connection,
+) -> Bytes raise XmppError {
+  let der = match self.transport {
+    Tls(tls, _) =>
+      tls.get_peer_certificate() catch {
+        err => raise XmppError::Io(detail="peer certificate: \{Repr(err)}")
+      }
+    Tcp(_) =>
+      raise XmppError::Auth(
+        detail="channel binding requires an encrypted stream",
+      )
+  }
+  match der {
+    Some(cert) => {
+      let hashed = @sasl.hash_bytes(alg=@sasl.Sha256, cert)
+      @sasl.fixed_to_bytes(hashed)
+    }
+    None =>
+      raise XmppError::ProtocolViolation(detail="no peer certificate on TLS")
   }
 }
 
