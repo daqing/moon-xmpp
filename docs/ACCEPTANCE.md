@@ -18,11 +18,12 @@ Both directions passed; the transcripts are stored as evidence:
 [interop-bob-cli.txt](acceptance/interop-bob-cli.txt) and
 [interop-alice-slixmpp.txt](acceptance/interop-alice-slixmpp.txt).
 
-## GUI run (manual)
+## GUI run (completed)
 
-The brief also asks for the same exchange with a GUI client
-(Psi/Gajim/Conversations) and screenshots, which needs a human at the
-keyboard.
+The same exchange was verified manually with Adium as alice@localhost
+(2026-10-02): the CLI's message arrived in the GUI, a reply typed in the GUI
+was printed by the running CLI, and the self-signed certificate was accepted
+via Adium's trust dialog. Screenshots were skipped by the author's decision.
 
 ## 1. Start the server and accounts
 

@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 through T8 completed; T9.1 through T9.3 and T9.5 completed; T9.4 awaits a manual GUI run (docs/ACCEPTANCE.md).
+> - As of 2026-10-01: T1 through T9 all completed (T9.4 verified via slixmpp interop and a manual Adium GUI run).
 
 ## T1 Design and Foundations
 
@@ -202,10 +202,10 @@ Goal: pass the acceptance scenario and wrap up.
       offline storage+delivery (bob→alice) — and it exposed two real SASL
       bugs (payload base64, SCRAM username) that are fixed
 - [x] T9.4 End-to-end acceptance: two-way message exchange with a
-      third-party client verified via slixmpp (independent implementation,
-      in a container; transcripts in docs/acceptance/) — GUI-client
-      screenshots (Psi/Gajim/Conversations) still await a manual run per
-      docs/ACCEPTANCE.md
+      third-party client verified twice — automated interop via slixmpp
+      (independent implementation; transcripts in docs/acceptance/) and a
+      manual GUI run with Adium by the author (2026-10-02; screenshots
+      skipped by the author's decision)
 - [x] T9.5 Wrap-up: READMEs updated (protocol table, roadmap, status,
       demo); demo material is the CLI + scripts/e2e.sh +
       docs/ACCEPTANCE.md
