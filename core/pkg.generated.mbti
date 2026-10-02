@@ -2,14 +2,17 @@
 package "daqing/moon-xmpp/core"
 
 import {
+  "daqing/moon-xmpp/xml",
   "moonbitlang/core/debug",
 }
 
 // Values
+pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError
 
 // Errors
 pub(all) suberror XmppError {
   ConnectionClosed
+  Io(detail~ : String)
   StreamError(condition~ : String)
   ProtocolViolation(detail~ : String)
 } derive(Eq, @debug.Debug)
@@ -18,6 +21,19 @@ pub fn XmppError::not_equal(Self, Self) -> Bool
 pub fn XmppError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+pub struct ByteStream {
+  // private fields
+}
+pub fn ByteStream::new() -> Self
+pub fn ByteStream::push_bytes(Self, Bytes) -> Array[@xml.Frame] raise @xml.XmlError
+pub fn ByteStream::reset(Self) -> Unit
+
+pub struct Connection {
+  // private fields
+}
+pub fn Connection::close(Self) -> Unit
+pub fn Connection::is_closed(Self) -> Bool
+pub async fn Connection::send_raw(Self, String) -> Unit raise XmppError
 
 // Type aliases
 

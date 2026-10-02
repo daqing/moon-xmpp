@@ -1,3 +1,11 @@
 import {
+  "daqing/moon-xmpp/xml",
+  "moonbitlang/async/socket",
   "moonbitlang/core/debug",
+  "moonbitlang/core/encoding/utf8",
 }
+
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/socket",
+} for "test"
