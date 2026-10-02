@@ -5,7 +5,7 @@
 > - 编号规则：`T<阶段>.<序号>`，阶段内顺序即建议实施顺序。
 > - 进度规则：每完成一项就勾选；完成协议能力相关的任务后，同步更新 README（中英两份）的协议覆盖表状态与 Roadmap 复选框。
 > - 依赖关系：T1 → T2 → … → T8 依次依赖；**T9.1（本地 ejabberd 环境）建议提前到 T2 开始前完成**，因为从流协商起就需要真实服务器联调。JID、XML、SCRAM 等纯计算任务不依赖服务器，可随时穿插进行。
-> - 截至 2026-10-01：T1、T2、T3 已完成（T3.1 至 T3.3）。
+> - 截至 2026-10-01：T1、T2、T3 已完成，T4.1 已完成。
 
 ## T1 设计与基础
 
@@ -39,7 +39,7 @@
 
 目标：完成登录。三种机制按序实现，后者复用前者的协商框架。
 
-- [ ] T4.1 SASL 协商框架：机制选择、`challenge` / `response` / `success` / `failure` 解析，成功后重启流
+- [x] T4.1 SASL 协商框架：机制选择（SCRAM-SHA-256 > SCRAM-SHA-1 > PLAIN，PLAIN 要求已加密）、`sasl_auth` / `sasl_respond`（同时作为自定义机制的公开 API）、逐字节读取 challenge/success/failure（服务器合并发送在 `</success>` 之后的字节在流重启后不丢失）；§6.5 failure 条件以 `XmppError::Auth` 抛出
 - [ ] T4.2 PLAIN（RFC 4616）：仅允许在已加密流上使用
 - [ ] T4.3 SCRAM-SHA-1（RFC 5802）：构造 client-first / client-final 消息，校验 server-signature（依赖 HMAC、PBKDF2、SHA-1 基础函数，用 RFC 5802 自带测试向量验证）
 - [ ] T4.4 SCRAM-SHA-256（RFC 7677）：复用 T4.3 的框架换哈希

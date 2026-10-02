@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1, T2, T3 completed (T3.1 through T3.3).
+> - As of 2026-10-01: T1, T2, T3 completed; T4.1 completed.
 
 ## T1 Design and Foundations
 
@@ -100,9 +100,12 @@ validation follow RFC 7590.
 Goal: log in. Implement the mechanisms in order; later ones reuse the
 negotiation framework.
 
-- [ ] T4.1 SASL negotiation framework: mechanism selection, parsing
-      `challenge` / `response` / `success` / `failure`, stream restart on
-      success
+- [x] T4.1 SASL negotiation framework: mechanism selection (SCRAM-SHA-256 >
+      SCRAM-SHA-1 > PLAIN, PLAIN gated on encryption), `sasl_auth` /
+      `sasl_respond` (also public API for custom mechanisms), and byte-wise
+      reading of challenge/success/failure so server bytes coalesced after
+      `</success>` survive the stream restart; §6.5 failure conditions
+      surface as `XmppError::Auth`
 - [ ] T4.2 PLAIN (RFC 4616): only over an encrypted stream
 - [ ] T4.3 SCRAM-SHA-1 (RFC 5802): build the client-first and client-final
       messages, verify the server-signature (needs HMAC, PBKDF2, and SHA-1

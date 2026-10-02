@@ -69,7 +69,7 @@ pub fn StanzaError::parse(
   el : @XMLParser.XMLElement,
 ) -> StanzaError raise XmppError {
   let error_type = match el.get_attribute("type") {
-    Some("auth") => Auth
+    Some("auth") => StanzaErrorType::Auth
     Some("cancel") => Cancel
     Some("continue") => Continue
     Some("modify") => Modify

@@ -10,7 +10,28 @@ import {
 // Values
 pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError
 
+pub fn select_mechanism(features~ : Features, encrypted~ : Bool) -> String?
+
 // Errors
+pub(all) suberror SaslFailureCondition {
+  Aborted
+  AccountDisabled
+  CredentialsExpired
+  EncryptionRequired
+  IncorrectEncoding
+  InvalidAuthzid
+  InvalidCredential
+  InvalidMechanism
+  InvalidSaslState
+  NotAuthorized
+  PolicyViolation
+  TemporaryAuthFailure
+  Unknown(String)
+} derive(Eq, @debug.Debug)
+pub fn SaslFailureCondition::equal(Self, Self) -> Bool
+pub fn SaslFailureCondition::not_equal(Self, Self) -> Bool
+pub fn SaslFailureCondition::to_repr(Self) -> @debug.Repr
+
 pub(all) suberror StanzaErrorCondition {
   BadRequest
   Conflict
@@ -73,6 +94,7 @@ pub fn StreamErrorCondition::to_repr(Self) -> @debug.Repr
 pub(all) suberror XmppError {
   ConnectionClosed
   Io(detail~ : String)
+  Auth(detail~ : String)
   StreamError(condition~ : StreamErrorCondition, text~ : String?)
   ProtocolViolation(detail~ : String)
 } derive(Eq, @debug.Debug)
@@ -95,7 +117,10 @@ pub fn Connection::close(Self) -> Unit
 pub fn Connection::is_closed(Self) -> Bool
 pub fn Connection::is_encrypted(Self) -> Bool
 pub async fn Connection::open_stream(Self, domain~ : String) -> Features raise XmppError
+pub async fn Connection::read_raw_element(Self) -> String raise XmppError
 pub async fn Connection::restart_stream(Self, domain~ : String) -> Features raise XmppError
+pub async fn Connection::sasl_auth(Self, mechanism~ : String, initial~ : String) -> SaslReply raise XmppError
+pub async fn Connection::sasl_respond(Self, payload~ : String) -> SaslReply raise XmppError
 pub async fn Connection::send_raw(Self, String) -> Unit raise XmppError
 pub async fn Connection::starttls(Self, domain~ : String, verify? : Bool) -> Features raise XmppError
 pub fn Connection::stream_id(Self) -> String?
@@ -109,6 +134,14 @@ pub struct Features {
 pub fn Features::equal(Self, Self) -> Bool
 pub fn Features::not_equal(Self, Self) -> Bool
 pub fn Features::to_repr(Self) -> @debug.Repr
+
+pub(all) enum SaslReply {
+  Challenge(String)
+  Success(String)
+} derive(Eq, @debug.Debug)
+pub fn SaslReply::equal(Self, Self) -> Bool
+pub fn SaslReply::not_equal(Self, Self) -> Bool
+pub fn SaslReply::to_repr(Self) -> @debug.Repr
 
 pub struct StanzaError {
   error_type : StanzaErrorType
