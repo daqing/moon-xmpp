@@ -10,6 +10,7 @@ pub struct Connection {
   priv mut transport : Transport
   priv byte_stream : ByteStream
   priv mut closed : Bool
+  priv mut state : ConnectionState
   priv mut stream_header : StreamHeader?
   priv mut features : Features?
   priv mut domain : String?
@@ -32,6 +33,7 @@ pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError 
     transport: Tcp(tcp),
     byte_stream: ByteStream::new(),
     closed: false,
+    state: Connecting,
     stream_header: None,
     features: None,
     domain: None,
@@ -40,6 +42,12 @@ pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError 
     frames: [],
     frame_pos: 0,
   }
+}
+
+///|
+/// Return the current session state.
+pub fn Connection::state(self : Connection) -> ConnectionState {
+  self.state
 }
 
 ///|

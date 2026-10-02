@@ -13,6 +13,11 @@ pub async fn Connection::bind_resource(
   if !advertised.bind {
     raise XmppError::ProtocolViolation(detail="server does not offer bind")
   }
+  if self.state != Authenticating {
+    raise XmppError::ProtocolViolation(
+      detail="bind requires an authenticated session",
+    )
+  }
   self.iq_counter += 1
   let id = "bind_\{self.iq_counter}"
   let bind_xml = if resource is "" {
@@ -57,6 +62,7 @@ pub async fn Connection::bind_resource(
       )
   }
   self.bound = Some(jid)
+  self.state = Bound
   jid
 }
 

@@ -127,7 +127,19 @@ pub async fn Connection::sasl_auth(Self, mechanism~ : String, initial~ : String)
 pub async fn Connection::sasl_respond(Self, payload~ : String) -> SaslReply raise XmppError
 pub async fn Connection::send_raw(Self, String) -> Unit raise XmppError
 pub async fn Connection::starttls(Self, domain~ : String, verify? : Bool) -> Features raise XmppError
+pub fn Connection::state(Self) -> ConnectionState
 pub fn Connection::stream_id(Self) -> String?
+
+pub(all) enum ConnectionState {
+  Connecting
+  NegotiatingTls
+  Authenticating
+  Bound
+  Online
+} derive(Eq, @debug.Debug)
+pub fn ConnectionState::equal(Self, Self) -> Bool
+pub fn ConnectionState::not_equal(Self, Self) -> Bool
+pub fn ConnectionState::to_repr(Self) -> @debug.Repr
 
 pub struct Features {
   starttls : Bool

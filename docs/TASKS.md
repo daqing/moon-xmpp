@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 through T4 completed (T4.1 through T4.5).
+> - As of 2026-10-01: T1 through T4 completed; T5.1 through T5.2 completed.
 
 ## T1 Design and Foundations
 
@@ -129,11 +129,15 @@ negotiation framework.
 
 Goal: obtain the full JID and produce a usable online session object.
 
-- [ ] T5.1 Bind iq: send the bind request (with or without a resource), parse
-      the returned full JID
-- [ ] T5.2 Session object and state machine: connecting → negotiating-tls →
-      authenticating → bound → online, exposing the bound JID and current
-      state
+- [x] T5.1 Bind iq: `bind_resource` sends the bind iq (self-closing bind
+      element without a resource, `<resource/>` with one), parses the
+      server-assigned full JID, stores it (`bound_jid`), and surfaces iq
+      errors with their stanza conditions
+- [x] T5.2 Session object and state machine: connecting → negotiating-tls →
+      authenticating → bound (→ online in T6) exposed via `state()`, with
+      ordering guards on starttls/authenticate/bind; the full TLS session
+      is covered by state assertions, and the bind mechanics are whitebox
+      tests that fast-forward to Authenticating
 
 ## T6 Presence (RFC 6121 §4)
 

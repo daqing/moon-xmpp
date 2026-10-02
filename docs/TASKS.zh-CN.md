@@ -5,7 +5,7 @@
 > - 编号规则：`T<阶段>.<序号>`，阶段内顺序即建议实施顺序。
 > - 进度规则：每完成一项就勾选；完成协议能力相关的任务后，同步更新 README（中英两份）的协议覆盖表状态与 Roadmap 复选框。
 > - 依赖关系：T1 → T2 → … → T8 依次依赖；**T9.1（本地 ejabberd 环境）建议提前到 T2 开始前完成**，因为从流协商起就需要真实服务器联调。JID、XML、SCRAM 等纯计算任务不依赖服务器，可随时穿插进行。
-> - 截至 2026-10-01：T1 至 T4 已完成（T4.1 至 T4.5）。
+> - 截至 2026-10-01：T1 至 T4 已完成，T5.1 至 T5.2 已完成。
 
 ## T1 设计与基础
 
@@ -49,8 +49,8 @@
 
 目标：拿到完整 JID，形成可用的在线会话对象。
 
-- [ ] T5.1 bind iq：发送绑定请求（携带或省略 resource），解析返回的完整 JID
-- [ ] T5.2 会话对象与状态机：connecting → negotiating-tls → authenticating → bound → online，对外暴露 bound JID 与当前状态
+- [x] T5.1 bind iq：`bind_resource` 发送绑定 iq（无 resource 时用自闭合 bind 元素，有则带 `<resource/>`），解析服务器分配的完整 JID 并存储（`bound_jid`），iq 错误带 stanza 条件抛出
+- [x] T5.2 会话对象与状态机：connecting → negotiating-tls → authenticating → bound（→ online 在 T6）经 `state()` 暴露，starttls/authenticate/bind 带顺序守卫；完整 TLS 会话有状态断言测试，bind 细节用白盒测试（直接快进到 Authenticating）覆盖
 
 ## T6 Presence（RFC 6121 §4）
 

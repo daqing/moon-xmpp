@@ -2,13 +2,14 @@
 /// Run `client_flow` against a fake server that completes a session up to
 /// the bind step and answers a single bind iq. Both sides run inside one
 /// task group so the server task can wait for the client's iq without
-/// deadlocking the group.
+/// deadlocking the group. The session is fast-forwarded to Authenticating
+/// state directly (white-box), since the SASL round is covered elsewhere.
 async fn bind_loopback(
   port~ : Int,
   resource_offered~ : String,
   reply_jid~ : String,
   error_reply? : Bool = false,
-  client_flow~ : async (@core.Connection) -> Unit,
+  client_flow~ : async (Connection) -> Unit,
 ) -> Unit {
   let addr = @socket.Addr::parse("127.0.0.1:\{port}") catch {
     _ => fail("invalid test addr")
@@ -50,8 +51,9 @@ async fn bind_loopback(
       }
       tcp.close()
     })
-    let conn = @core.connect(host="127.0.0.1", port~)
-    ignore(@core.Connection::open_stream(conn, domain="example.com"))
+    let conn = connect(host="127.0.0.1", port~)
+    ignore(conn.open_stream(domain="example.com"))
+    conn.state = Authenticating
     client_flow(conn)
     conn.close()
   })
@@ -64,13 +66,14 @@ async test "bind with a requested resource" {
     resource_offered="laptop",
     reply_jid="user@example.com/laptop",
     client_flow=conn => {
-      let jid = @core.Connection::bind_resource(conn, resource="laptop")
+      let jid = conn.bind_resource(resource="laptop")
       assert_eq(jid.to_string(), "user@example.com/laptop")
-      guard @core.Connection::bound_jid(conn) is Some(bound) else {
+      guard conn.bound_jid() is Some(bound) else {
         fail("bound jid not stored")
       }
       assert_eq(bound.localpart, Some("user"))
       assert_eq(bound.resourcepart, Some("laptop"))
+      assert_eq(conn.state(), Bound)
     },
   )
 }
@@ -82,7 +85,7 @@ async test "bind without a resource gets a server-assigned one" {
     resource_offered="",
     reply_jid="user@example.com/server-assigned-1",
     client_flow=conn => {
-      let jid = @core.Connection::bind_resource(conn)
+      let jid = conn.bind_resource()
       assert_eq(jid.resourcepart, Some("server-assigned-1"))
     },
   )
@@ -96,11 +99,12 @@ async test "bind error raises with the condition" {
     reply_jid="",
     error_reply=true,
     client_flow=conn => {
-      try @core.Connection::bind_resource(conn, resource="dup") catch {
-        err => assert_true(err is @core.XmppError::ProtocolViolation(detail=_))
+      try conn.bind_resource(resource="dup") catch {
+        err => assert_true(err is XmppError::ProtocolViolation(detail=_))
       } noraise {
         _ => fail("expected bind error")
       }
+      assert_eq(conn.state(), Authenticating)
     },
   )
 }

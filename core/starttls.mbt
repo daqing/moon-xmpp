@@ -8,6 +8,12 @@ pub async fn Connection::starttls(
   domain~ : String,
   verify? : Bool = true,
 ) -> Features raise XmppError {
+  if self.state != Connecting {
+    raise XmppError::ProtocolViolation(
+      detail="STARTTLS must precede authentication",
+    )
+  }
+  self.state = NegotiatingTls
   let advertised = match self.features {
     Some(f) => f
     None => raise XmppError::ProtocolViolation(detail="stream not open")
