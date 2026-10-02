@@ -28,4 +28,5 @@ description = "An XMPP client library for MoonBit"
 import {
   "moonbit-community/XMLParser@0.2.6",
   "moonbit-community/unicode@0.5.2",
+  "moonbitlang/async@0.22.4",
 }

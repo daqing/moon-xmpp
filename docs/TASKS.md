@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 completed (T1.1 through T1.5).
+> - As of 2026-10-01: T1 and T2 completed (T2.1 through T2.5).
 
 ## T1 Design and Foundations
 
@@ -47,17 +47,30 @@ Goal: settle the programming model and lay the JID and XML groundwork.
 Goal: complete the stream handshake with the server, parse features, and
 handle stream-level errors.
 
-- [ ] T2.1 TCP connection layer: connect, read/write loop, close (native
-      target)
-- [ ] T2.2 Stream header round-trip: send the client header (`to`, `version`,
+- [x] T2.1 TCP connection layer: connect, read/write loop, close (native
+      target) — moonbitlang/async@0.22.4 pinned; `ByteStream` decodes
+      complete UTF-8 prefixes from raw socket reads (chunk-boundary safe)
+      and feeds the framer; loopback tests cover connect/send/close
+- [x] T2.2 Stream header round-trip: send the client header (`to`, `version`,
       etc.), parse the server response header; support stream restarts (one
-      after TLS, one after SASL)
-- [ ] T2.3 Stream features parsing: recognize at least `starttls`,
-      `mechanisms`, and `bind`
-- [ ] T2.4 Stream error handling (RFC 6120 §4.9): parse, report upstream,
-      disconnect
-- [ ] T2.5 Stanza error parsing (RFC 6120 §8.3): type and condition of
-      `<error/>` children
+      after TLS, one after SASL) — `Connection::open_stream` /
+      `restart_stream`; the response header is validated (stream namespace,
+      version 1.0, id); frames from one socket read are buffered so none are
+      dropped between reads
+- [x] T2.3 Stream features parsing: recognize at least `starttls`,
+      `mechanisms`, and `bind` — `open_stream` / `restart_stream` return a
+      `Features` summary; local-name matching, unknown features ignored.
+      Also fixed a framer bug surfaced by the loopback test: `/` in a tag's
+      attribute region now correctly marks the tag self-closing
+- [x] T2.4 Stream error handling (RFC 6120 §4.9): parse, report upstream,
+      disconnect — all §4.9.3 conditions mapped to a structured
+      `StreamErrorCondition` (incl. see-other-host); a `stream:error` stanza
+      read from the stream raises `XmppError::StreamError` with the optional
+      `<text/>`
+- [x] T2.5 Stanza error parsing (RFC 6120 §8.3): type and condition of
+      `<error/>` children — `StanzaError::parse` maps all §8.3.3 conditions
+      (incl. redirect) plus the error type, optional text, and unknown
+      application conditions
 
 ## T3 STARTTLS (RFC 6120 §5)
 

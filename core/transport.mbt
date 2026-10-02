@@ -1,0 +1,101 @@
+///|
+priv enum Transport {
+  Tcp(@socket.Tcp)
+}
+
+///|
+/// A client connection to an XMPP server.
+pub struct Connection {
+  priv transport : Transport
+  priv byte_stream : ByteStream
+  priv mut closed : Bool
+  priv mut stream_header : StreamHeader?
+  priv frames : Array[@xml.Frame]
+  priv mut frame_pos : Int
+}
+
+///|
+/// Connect to an XMPP server over TCP.
+pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError {
+  let tcp = @socket.Tcp::connect_to_host(host, port~) catch {
+    err =>
+      raise XmppError::Io(
+        detail="connect to \{host}:\{port} failed: \{Repr(err)}",
+      )
+  }
+  {
+    transport: Tcp(tcp),
+    byte_stream: ByteStream::new(),
+    closed: false,
+    stream_header: None,
+    frames: [],
+    frame_pos: 0,
+  }
+}
+
+///|
+/// Return the stream id assigned by the server, if the stream is open.
+pub fn Connection::stream_id(self : Connection) -> String? {
+  match self.stream_header {
+    Some(header) => Some(header.id)
+    None => None
+  }
+}
+
+///|
+/// Send raw text on the stream.
+pub async fn Connection::send_raw(
+  self : Connection,
+  s : String,
+) -> Unit raise XmppError {
+  match self.transport {
+    Tcp(tcp) =>
+      tcp.write(s) catch {
+        err => raise XmppError::Io(detail="write failed: \{Repr(err)}")
+      }
+  }
+}
+
+///|
+/// Close the connection.
+pub fn Connection::close(self : Connection) -> Unit {
+  match self.transport {
+    Tcp(tcp) => tcp.close()
+  }
+  self.closed = true
+}
+
+///|
+pub fn Connection::is_closed(self : Connection) -> Bool {
+  self.closed
+}
+
+///|
+/// Read from the socket until at least one frame completes.
+async fn Connection::pump(
+  self : Connection,
+) -> Array[@xml.Frame] raise XmppError {
+  for ;; {
+    match self.transport {
+      Tcp(tcp) => {
+        let chunk = tcp.read_some() catch {
+          err => raise XmppError::Io(detail="read failed: \{Repr(err)}")
+        }
+        match chunk {
+          None => {
+            self.closed = true
+            raise XmppError::ConnectionClosed
+          }
+          Some(data) => {
+            let frames = self.byte_stream.push_bytes(data) catch {
+              err => raise XmppError::ProtocolViolation(detail="\{Repr(err)}")
+            }
+            if frames.length() > 0 {
+              return frames
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -37,6 +37,7 @@ pub struct Framer {
 }
 pub fn Framer::new() -> Self
 pub fn Framer::push(Self, String) -> Array[Frame] raise XmlError
+pub fn Framer::reset(Self) -> Unit
 
 // Type aliases
 
