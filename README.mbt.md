@@ -7,9 +7,10 @@ An XMPP client library for MoonBit, implementing the client side of
 ## Status
 
 **Work in progress.** moon-xmpp is being developed as an entry for a MoonBit
-hackathon. The repository currently contains the project skeleton; the
-protocol implementation is underway — see [Roadmap](#roadmap) for the build
-order.
+hackathon. The core session lifecycle (streams, STARTTLS, SASL, binding,
+presence, chat) is implemented and covered by tests against in-process loop
+back servers; integration against a real ejabberd instance and the CLI demo
+are next — see [Roadmap](#roadmap).
 
 ## What it does
 
@@ -29,13 +30,13 @@ The acceptance scenario for the project:
 
 | Feature | Standard | Status |
 | --- | --- | --- |
-| XML streams | [RFC 6120 §4](https://www.rfc-editor.org/rfc/rfc6120#section-4) | planned |
-| STARTTLS | [RFC 6120 §5](https://www.rfc-editor.org/rfc/rfc6120#section-5) | planned |
-| SASL: PLAIN, SCRAM-SHA-1, SCRAM-SHA-256 | [RFC 4422](https://www.rfc-editor.org/rfc/rfc4422), [RFC 4616](https://www.rfc-editor.org/rfc/rfc4616), [RFC 5802](https://www.rfc-editor.org/rfc/rfc5802), [RFC 7677](https://www.rfc-editor.org/rfc/rfc7677) | planned |
-| Resource binding | [RFC 6120 §7](https://www.rfc-editor.org/rfc/rfc6120#section-7) | planned |
-| Initial presence | [RFC 6121 §4.2](https://www.rfc-editor.org/rfc/rfc6121#section-4.2) | planned |
-| Chat messages | [RFC 6120 §8](https://www.rfc-editor.org/rfc/rfc6120#section-8), [RFC 6121 §5.2](https://www.rfc-editor.org/rfc/rfc6121#section-5.2) | planned |
-| JID parsing and normalization | [RFC 8264](https://www.rfc-editor.org/rfc/rfc8264) | planned |
+| XML streams | [RFC 6120 §4](https://www.rfc-editor.org/rfc/rfc6120#section-4) | done |
+| STARTTLS | [RFC 6120 §5](https://www.rfc-editor.org/rfc/rfc6120#section-5) | done |
+| SASL: PLAIN, SCRAM-SHA-1, SCRAM-SHA-256 | [RFC 4422](https://www.rfc-editor.org/rfc/rfc4422), [RFC 4616](https://www.rfc-editor.org/rfc/rfc4616), [RFC 5802](https://www.rfc-editor.org/rfc/rfc5802), [RFC 7677](https://www.rfc-editor.org/rfc/rfc7677) | done |
+| Resource binding | [RFC 6120 §7](https://www.rfc-editor.org/rfc/rfc6120#section-7) | done |
+| Initial presence | [RFC 6121 §4.2](https://www.rfc-editor.org/rfc/rfc6121#section-4.2) | done |
+| Chat messages | [RFC 6120 §8](https://www.rfc-editor.org/rfc/rfc6120#section-8), [RFC 6121 §5.2](https://www.rfc-editor.org/rfc/rfc6121#section-5.2) | done |
+| JID parsing and normalization | [RFC 8264](https://www.rfc-editor.org/rfc/rfc8264) | done |
 
 ## Non-goals
 
@@ -103,12 +104,12 @@ CLI takes shape.
 
 ## Roadmap
 
-1. [ ] XML stream negotiation — RFC 6120 §4
-2. [ ] STARTTLS — RFC 6120 §5
-3. [ ] SASL authentication: PLAIN, SCRAM-SHA-1, SCRAM-SHA-256
-4. [ ] Resource binding — RFC 6120 §7
-5. [ ] Initial presence — RFC 6121 §4.2
-6. [ ] Chat message send/receive — RFC 6120 §8, RFC 6121 §5.2
+1. [x] XML stream negotiation — RFC 6120 §4
+2. [x] STARTTLS — RFC 6120 §5
+3. [x] SASL authentication: PLAIN, SCRAM-SHA-1, SCRAM-SHA-256
+4. [x] Resource binding — RFC 6120 §7
+5. [x] Initial presence — RFC 6121 §4.2
+6. [x] Chat message send/receive — RFC 6120 §8, RFC 6121 §5.2
 7. [ ] CLI demo in `cmd/main`
 
 ## Development

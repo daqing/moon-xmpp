@@ -63,7 +63,7 @@ fn parse_presence(el : @XMLParser.XMLElement) -> Presence raise XmppError {
   for child in el.get_children() {
     guard child is @XMLParser.XMLChildren::Element(e) else { continue }
     if e.name == "status" {
-      status = Some(e.get_text())
+      status = Some(element_text(e))
     }
   }
   { from, presence_type: el.get_attribute("type"), status, }

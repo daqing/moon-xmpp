@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 through T5 completed; T6.1 through T6.3 completed.
+> - As of 2026-10-01: T1 through T6 completed; T7.1 through T7.3 completed.
 
 ## T1 Design and Foundations
 
@@ -158,12 +158,16 @@ notifications.
 
 Goal: two-way chat — the core of the acceptance scenario.
 
-- [ ] T7.1 Sending a chat message: `type='chat'` + `<body/>` + `to`,
-      generate a stanza id
-- [ ] T7.2 Receiving a chat message: parse `from` / `body` and expose it to
-      the caller in the API shape settled in T1.1
-- [ ] T7.3 Robustness to unknown content: ignore unrecognized stanzas and
-      child elements per RFC 6120's ignoring rules; never crash
+- [x] T7.1 Sending a chat message: `send_chat` emits `type='chat'` with a
+      generated stanza id and an escaped body, guarded to bound sessions
+- [x] T7.2 Receiving a chat message: `recv_stanza` dispatches Chat /
+      Presence / Other; `ChatMessage` carries from, id, and body;
+      `recv_presence` is now a thin filter over the dispatch
+- [x] T7.3 Robustness to unknown content: unknown top-level elements
+      surface as Other, unknown stanza children are skipped, and body text
+      is composed with full entity decoding (the XML parser keeps entity
+      references as separate children, which get_text dropped — caught by
+      these tests)
 
 ## T8 CLI Demo (cmd/main)
 

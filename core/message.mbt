@@ -89,9 +89,92 @@ fn parse_chat(el : @XMLParser.XMLElement) -> ChatMessage raise XmppError {
   for child in el.get_children() {
     guard child is @XMLParser.XMLChildren::Element(e) else { continue }
     if e.name == "body" {
-      body = Some(e.get_text())
+      body = Some(element_text(e))
       break
     }
   }
   { from, id: el.get_attribute("id"), body, }
+}
+
+///|
+/// Compose the character data of an element. The XML parser keeps entity
+/// references as separate children, so they are decoded here: the five
+/// predefined entities plus decimal and hex character references. Unknown
+/// references are kept literally.
+fn element_text(el : @XMLParser.XMLElement) -> String {
+  let buf = StringBuilder()
+  for child in el.get_children() {
+    match child {
+      @XMLParser.XMLChildren::Text(t) => buf.write_string(t)
+      @XMLParser.XMLChildren::CDATA(t) => buf.write_string(t)
+      @XMLParser.XMLChildren::WhiteSpace(t) => buf.write_string(t)
+      @XMLParser.XMLChildren::Reference(r) =>
+        buf.write_string(decode_reference(r))
+      _ => ()
+    }
+  }
+  buf.to_string()
+}
+
+///|
+/// Parse an uppercase or lowercase hex number, None on invalid input.
+fn parse_hex(s : String) -> Int? {
+  let mut n = 0
+  for c in s {
+    let d = match c {
+      '0'..='9' => c.to_int() - 0x30
+      'a'..='f' => c.to_int() - 0x61 + 10
+      'A'..='F' => c.to_int() - 0x41 + 10
+      _ => return None
+    }
+    n = n * 16 + d
+  }
+  Some(n)
+}
+
+///|
+fn decode_reference(r : String) -> String {
+  // the parser stores named references as "&amp;" but numeric ones as
+  // "#65;", so strip the trailing ";" and an optional leading "&"
+  guard r.has_suffix(";") && r.length() >= 2 else { return r }
+  let name = if r.has_prefix("&") {
+    r[1:r.length() - 1].to_owned()
+  } else {
+    r[:r.length() - 1].to_owned()
+  }
+  match name {
+    "amp" => return "&"
+    "lt" => return "<"
+    "gt" => return ">"
+    "quot" => return "\""
+    "apos" => return "'"
+    _ => ()
+  }
+  if name.has_prefix("#x") || name.has_prefix("#X") {
+    match parse_hex(name[2:].to_owned()) {
+      Some(n) =>
+        match n.to_char() {
+          Some(c) => return char_to_string(c)
+          None => return r
+        }
+      None => return r
+    }
+  }
+  if name.has_prefix("#") {
+    let n = @string.parse_int(name[1:].to_owned()) catch { _ => -1 }
+    if n >= 0 {
+      match n.to_char() {
+        Some(c) => return char_to_string(c)
+        None => return r
+      }
+    }
+  }
+  r
+}
+
+///|
+fn char_to_string(c : Char) -> String {
+  let b = StringBuilder()
+  b.write_char(c)
+  b.to_string()
 }
