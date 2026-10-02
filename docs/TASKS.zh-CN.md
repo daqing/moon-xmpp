@@ -5,7 +5,7 @@
 > - 编号规则：`T<阶段>.<序号>`，阶段内顺序即建议实施顺序。
 > - 进度规则：每完成一项就勾选；完成协议能力相关的任务后，同步更新 README（中英两份）的协议覆盖表状态与 Roadmap 复选框。
 > - 依赖关系：T1 → T2 → … → T8 依次依赖；**T9.1（本地 ejabberd 环境）建议提前到 T2 开始前完成**，因为从流协商起就需要真实服务器联调。JID、XML、SCRAM 等纯计算任务不依赖服务器，可随时穿插进行。
-> - 截至 2026-10-01：T1 至 T6 已完成，T7.1 至 T7.3 已完成。
+> - 截至 2026-10-01：T1 至 T7 已完成，T8.1 至 T8.3 已完成。
 
 ## T1 设计与基础
 
@@ -72,9 +72,9 @@
 
 目标：一条命令复现验收场景。
 
-- [ ] T8.1 参数解析：`--jid` / `--password` / `--to` / `--body`，可选 `--host` / `--port` 覆盖
-- [ ] T8.2 串起全链路：connect → starttls → sasl → bind → presence → send
-- [ ] T8.3 收消息循环：打印收到的消息，作为反向链路可用的证明
+- [x] T8.1 参数解析：`--jid` / `--password` / `--to` / `--body`，可选 `--host` / `--port` / `--resource`，支持 `--name value` 与 `--name=value` 两种形式，带类型化 CliError
+- [x] T8.2 串起全链路：connect → starttls → sasl → bind → presence → send——`run` 由 TLS 回环测试端到端覆盖，走完整个会话并检查发出的消息
+- [x] T8.3 收消息循环：打印聊天消息与 presence 广播直到流结束；TLS 回环测试用收集型 printer 覆盖
 
 ## T9 测试与验收
 

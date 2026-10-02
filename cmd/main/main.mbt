@@ -8,7 +8,9 @@ async fn main {
     None => 5222
   }
   let conn = run(opts, host~, port~)
-  conn.close()
+  receive_loop(conn, print=println) catch {
+    err => println("session ended: \{Repr(err)}")
+  }
 }
 
 ///|

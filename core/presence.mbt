@@ -18,7 +18,7 @@ pub async fn Connection::send_initial_presence(
 /// A received contact presence broadcast (RFC 6121 §4.4). `presence_type`
 /// is None for available and carries e.g. "unavailable" or "error"
 /// otherwise.
-pub struct Presence {
+pub(all) struct Presence {
   from : @jid.Jid?
   presence_type : String?
   status : String?

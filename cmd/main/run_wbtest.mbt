@@ -76,6 +76,10 @@ async test "run completes the full chain and delivers the chat message" {
       tls.write(
         "<message from='bob@example.com' type='chat'><body>got it</body></message>",
       )
+      tls.write(
+        "<presence from='alice@example.com' type='unavailable'><status>brb</status></presence>",
+      )
+      @async.sleep(200)
       tls.close()
       tcp.close()
     })
@@ -92,6 +96,16 @@ async test "run completes the full chain and delivers the chat message" {
     assert_eq(conn.state(), Online)
     guard conn.bound_jid() is Some(jid) else { fail("not bound") }
     assert_eq(jid.to_string(), "user@example.com/cli")
+    let lines : Array[String] = []
+    let print = fn(line : String) { lines.push(line) }
+    try receive_loop(conn, print~) catch {
+      err => assert_true(err is @core.XmppError::ConnectionClosed)
+    } noraise {
+      _ => fail("expected stream end")
+    }
+    assert_eq(lines, [
+      "[bob@example.com] got it", "* alice@example.com is unavailable: brb",
+    ])
     conn.close()
   })
 }

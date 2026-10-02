@@ -63,29 +63,29 @@ import {
 
 ## Usage
 
-> The API is still taking shape, but the direction is decided: async
-> functions built on
+> The API is built on
 > [moonbitlang/async](https://mooncakes.io/docs/moonbitlang/async). MoonBit
 > has no `await` keyword — async calls look like ordinary calls, and errors
-> propagate implicitly. The example below is illustrative; it will be updated
-> as the API lands.
+> propagate implicitly (functions raising `XmppError` must be called from a
+> raising context).
 
 ```moonbit nocheck
 ///|
 async fn main {
   let conn = @xmpp.connect(host="example.com", port=5222)
-  conn.starttls()
-  conn.authenticate(jid="alice@example.com", password="secret")
-  conn.bind_resource("laptop")
+  conn.open_stream(domain="example.com")
+  ignore(conn.starttls(domain="example.com"))
+  ignore(conn.authenticate(jid="alice@example.com", password="secret"))
+  ignore(conn.bind_resource(resource="laptop"))
   conn.send_initial_presence()
-  conn.send_chat(to="bob@example.com", body="Hello from MoonBit!")
+  let id = conn.send_chat(to="bob@example.com", body="Hello from MoonBit!")
+  let stanza = conn.recv_stanza() // Chat / Presence / Other
 }
 ```
 
 ## Demo
 
-A small CLI lives in `cmd/main`. Once the client is functional, a full
-acceptance run will look like this:
+A small CLI lives in `cmd/main`:
 
 ```bash
 git clone https://github.com/daqing/moon-xmpp
@@ -97,10 +97,12 @@ moon run cmd/main -- \
   --body 'Hello from MoonBit!'
 ```
 
-With a standard client (Psi, Gajim, Conversations) logged in as
-`bob@example.com`, the message arrives immediately; a reply sent from that
-client is delivered to the running CLI. Flag names may still change while the
-CLI takes shape.
+It connects (STARTTLS by default, `--host`/`--port` to override), logs in,
+binds a resource, goes online, sends the message, and then prints incoming
+messages and presence broadcasts until the stream ends. With a standard
+client (Psi, Gajim, Conversations) logged in as `bob@example.com`, the
+message arrives immediately; a reply sent from that client is printed by the
+running CLI.
 
 ## Roadmap
 
@@ -110,7 +112,7 @@ CLI takes shape.
 4. [x] Resource binding — RFC 6120 §7
 5. [x] Initial presence — RFC 6121 §4.2
 6. [x] Chat message send/receive — RFC 6120 §8, RFC 6121 §5.2
-7. [ ] CLI demo in `cmd/main`
+7. [x] CLI demo in `cmd/main`
 
 ## Development
 
