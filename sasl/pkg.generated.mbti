@@ -6,6 +6,7 @@ import {
 }
 
 // Values
+pub fn plain(authcid~ : String, password~ : String, authzid? : String) -> String raise SaslError
 
 // Errors
 pub(all) suberror SaslError {

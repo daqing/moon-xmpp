@@ -12,6 +12,7 @@ pub struct Connection {
   priv mut closed : Bool
   priv mut stream_header : StreamHeader?
   priv mut features : Features?
+  priv mut domain : String?
   priv frames : Array[@xml.Frame]
   priv mut frame_pos : Int
 }
@@ -31,6 +32,7 @@ pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError 
     closed: false,
     stream_header: None,
     features: None,
+    domain: None,
     frames: [],
     frame_pos: 0,
   }

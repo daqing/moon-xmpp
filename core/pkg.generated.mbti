@@ -113,6 +113,7 @@ pub fn ByteStream::reset(Self) -> Unit
 pub struct Connection {
   // private fields
 }
+pub async fn Connection::authenticate(Self, jid~ : String, password~ : String, mechanism? : String?) -> Features raise XmppError
 pub fn Connection::close(Self) -> Unit
 pub fn Connection::is_closed(Self) -> Bool
 pub fn Connection::is_encrypted(Self) -> Bool

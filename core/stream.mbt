@@ -100,6 +100,7 @@ pub async fn Connection::open_stream(
   self : Connection,
   domain~ : String,
 ) -> Features raise XmppError {
+  self.domain = Some(domain)
   self.send_raw(build_stream_header(domain))
   match self.read_incoming() {
     Header(text) => self.stream_header = Some(parse_stream_header(text))
