@@ -11,7 +11,7 @@
 
 name = "daqing/moon-xmpp"
 
-version = "0.1.0"
+version = "0.9.5"
 
 readme = "README.mbt.md"
 
