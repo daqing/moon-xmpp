@@ -104,3 +104,44 @@ async test "recv_presence parses broadcasts and skips other stanzas" {
     },
   )
 }
+
+///|
+async test "signoff sends unavailable presence and closes the stream" {
+  presence_loopback(
+    port=46844,
+    server=tcp => {
+      let mut buf = ""
+      for ;; {
+        match tcp.read_some() {
+          None => return
+          Some(data) => {
+            buf = buf + @utf8.decode(data)
+            if buf.contains("</stream:stream>") {
+              break
+            }
+          }
+        }
+      }
+      assert_true(buf.contains("<presence type='unavailable'"))
+      assert_true(buf.has_suffix("</stream:stream>"))
+    },
+    client_flow=conn => {
+      conn.send_initial_presence()
+      conn.signoff()
+      assert_true(conn.is_closed())
+    },
+  )
+}
+
+///|
+async test "signoff requires a bound session" {
+  presence_loopback(port=46845, server=_tcp => (), client_flow=conn => {
+    conn.state = Connecting
+    try conn.signoff() catch {
+      err => assert_true(err is XmppError::ProtocolViolation(detail=_))
+    } noraise {
+      _ => fail("expected refusal")
+    }
+    assert_false(conn.is_closed())
+  })
+}

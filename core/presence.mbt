@@ -71,3 +71,17 @@ pub async fn Connection::recv_presence(
     }
   }
 }
+
+///|
+/// Sign off gracefully: send an unavailable presence, close the XML stream,
+/// and disconnect (RFC 6121 §4.5, RFC 6120 §4.4).
+pub async fn Connection::signoff(self : Connection) -> Unit raise XmppError {
+  if !(self.state is (Bound | Online)) {
+    raise XmppError::ProtocolViolation(
+      detail="signoff requires a bound session",
+    )
+  }
+  self.send_raw("<presence type='unavailable' xmlns='jabber:client'/>")
+  self.send_raw("</stream:stream>")
+  self.close()
+}

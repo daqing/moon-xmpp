@@ -5,7 +5,7 @@
 > - 编号规则：`T<阶段>.<序号>`，阶段内顺序即建议实施顺序。
 > - 进度规则：每完成一项就勾选；完成协议能力相关的任务后，同步更新 README（中英两份）的协议覆盖表状态与 Roadmap 复选框。
 > - 依赖关系：T1 → T2 → … → T8 依次依赖；**T9.1（本地 ejabberd 环境）建议提前到 T2 开始前完成**，因为从流协商起就需要真实服务器联调。JID、XML、SCRAM 等纯计算任务不依赖服务器，可随时穿插进行。
-> - 截至 2026-10-01：T1 至 T4 已完成，T5.1 至 T5.2 已完成。
+> - 截至 2026-10-01：T1 至 T5 已完成，T6.1 至 T6.3 已完成。
 
 ## T1 设计与基础
 
@@ -56,9 +56,9 @@
 
 目标：上线可见，能收到对方的上下线通知。
 
-- [ ] T6.1 发送 initial presence（RFC 6121 §4.2）
-- [ ] T6.2 接收 presence 广播并暴露给调用方（对方 available / unavailable）
-- [ ] T6.3 断开前发送 unavailable presence（优雅下线）
+- [x] T6.1 发送 initial presence（RFC 6121 §4.2）——`send_initial_presence` 要求已绑定会话，发送后进入 Online
+- [x] T6.2 接收 presence 广播并暴露给调用方（对方 available / unavailable）——`recv_presence` 解析 from/type/status；非 presence stanza 暂时跳过，T7 聊天支持落地后接入消息接收
+- [x] T6.3 断开前发送 unavailable presence（优雅下线）——`signoff` 一次调用完成：发 unavailable presence、关 XML 流、断开连接
 
 ## T7 聊天消息（RFC 6120 §8，RFC 6121 §5.2）
 

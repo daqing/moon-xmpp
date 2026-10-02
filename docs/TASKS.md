@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 through T4 completed; T5.1 through T5.2 completed.
+> - As of 2026-10-01: T1 through T5 completed; T6.1 through T6.3 completed.
 
 ## T1 Design and Foundations
 
@@ -144,11 +144,15 @@ Goal: obtain the full JID and produce a usable online session object.
 Goal: become visible online and receive other parties' presence
 notifications.
 
-- [ ] T6.1 Send initial presence (RFC 6121 §4.2)
-- [ ] T6.2 Receive presence broadcasts and expose them to the caller (other
-      parties becoming available / unavailable)
-- [ ] T6.3 Send unavailable presence before disconnecting (graceful
-      sign-off)
+- [x] T6.1 Send initial presence (RFC 6121 §4.2) — `send_initial_presence`
+      requires a bound session and moves it to Online
+- [x] T6.2 Receive presence broadcasts and expose them to the caller (other
+      parties becoming available / unavailable) — `recv_presence` parses
+      from/type/status; non-presence stanzas are skipped until chat support
+      lands in T7
+- [x] T6.3 Send unavailable presence before disconnecting (graceful
+      sign-off) — `signoff` sends the unavailable presence, closes the XML
+      stream, and disconnects in one call
 
 ## T7 Chat Messages (RFC 6120 §8, RFC 6121 §5.2)
 
