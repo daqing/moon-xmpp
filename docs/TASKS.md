@@ -196,7 +196,8 @@ Goal: pass the acceptance scenario and wrap up.
       CLI, or library-level)
 - [ ] T9.4 End-to-end acceptance: run the acceptance scenario with Psi /
       Gajim / Conversations, exchange messages both ways, keep screenshots
-      as evidence
+      as evidence — guide and commands are ready in docs/ACCEPTANCE.md;
+      requires a human with a GUI client, pending manual run
 - [ ] T9.5 Wrap-up: update the READMEs (protocol table status, Roadmap
       checkboxes, Status section), prepare demo material
 

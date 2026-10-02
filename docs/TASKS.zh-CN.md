@@ -83,7 +83,7 @@
 - [ ] T9.1 本地 ejabberd 测试环境：Docker 起 ejabberd，注册两个测试账号，一键起停脚本（**务必在 T2 之前完成**）
 - [ ] T9.2 单元测试补全：JID 边界用例、XML 转义与畸形输入、SCRAM 用 RFC 5802 测试向量
 - [ ] T9.3 集成测试：走完整链路互发消息（CLI 对 CLI 或库级测试）
-- [ ] T9.4 端到端验收：用 Psi / Gajim / Conversations 实测互发消息，截图留证
+- [ ] T9.4 端到端验收：用 Psi / Gajim / Conversations 实测互发消息，截图留证——步骤与命令已备好在 docs/ACCEPTANCE.md；需要有人在 GUI 客户端操作，待人工执行
 - [ ] T9.5 收尾：更新 README（协议表状态、Roadmap 勾选、Status 段落改为可用），准备演示材料
 
 ---
