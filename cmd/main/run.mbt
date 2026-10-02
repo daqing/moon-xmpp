@@ -16,7 +16,7 @@ pub async fn run(
     }).domainpart
   let conn : @core.Connection = @core.connect(host~, port~)
   ignore(conn.open_stream(domain~))
-  ignore(conn.starttls(domain~, verify~))
+  ignore(conn.starttls(domain~, verify~, ca_file=opts.ca_file))
   ignore(conn.authenticate(jid=opts.jid, password=opts.password))
   ignore(conn.bind_resource(resource=opts.resource.unwrap_or("")))
   conn.send_initial_presence()

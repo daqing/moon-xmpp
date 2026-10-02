@@ -7,6 +7,7 @@ pub async fn Connection::starttls(
   self : Connection,
   domain~ : String,
   verify? : Bool = true,
+  ca_file? : String? = None,
 ) -> Features raise XmppError {
   if self.state != Connecting {
     raise XmppError::ProtocolViolation(
@@ -37,10 +38,14 @@ pub async fn Connection::starttls(
       detail="unexpected STARTTLS response: \{response}",
     )
   }
-  let trust = if verify {
-    @tls.TrustedRoot::SystemRoot
-  } else {
-    @tls.TrustedRoot::NoVerification
+  let trust = match ca_file {
+    Some(f) => @tls.TrustedRoot::CustomPemFile(f)
+    None =>
+      if verify {
+        @tls.TrustedRoot::SystemRoot
+      } else {
+        @tls.TrustedRoot::NoVerification
+      }
   }
   let tls = @tls.Tls::client(tcp, host=domain, trust~) catch {
     err => raise XmppError::Io(detail="tls handshake failed: \{Repr(err)}")

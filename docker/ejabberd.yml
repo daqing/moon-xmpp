@@ -1,0 +1,45 @@
+hosts:
+  - localhost
+
+loglevel: 4
+
+certfiles:
+  - "/home/ejabberd/conf/certs/server.pem"
+
+listen:
+  -
+    port: 5222
+    ip: "0.0.0.0"
+    module: ejabberd_c2s
+    starttls: true
+    starttls_required: true
+    max_stanza_size: 262144
+
+auth_password_format: scram
+
+acl:
+  local:
+    user_regexp: ""
+
+access_rules:
+  local:
+    - allow: local
+
+api_permissions:
+  "console commands":
+    from:
+      - ejabberd_ctl
+    who: all
+    what: "*"
+
+modules:
+  mod_caps: {}
+  mod_disco: {}
+  mod_last: {}
+  mod_offline: {}
+  mod_ping: {}
+  mod_privacy: {}
+  mod_private: {}
+  mod_roster: {}
+  mod_vcard: {}
+  mod_version: {}

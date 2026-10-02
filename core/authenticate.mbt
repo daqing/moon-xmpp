@@ -101,15 +101,32 @@ async fn Connection::scram_exchange(
   } else {
     ("n", b"")
   }
+  // XMPP servers expect the SCRAM username to be the localpart of the
+  // JID (nodeprep rejects "@")
+  let parsed = @jid.Jid::parse(jid) catch {
+    err =>
+      raise XmppError::ProtocolViolation(
+        detail="invalid jid for authentication: \{Repr(err)}",
+      )
+  }
+  let username = match parsed.localpart {
+    Some(l) => l
+    None => jid
+  }
   let (client, first) = @sasl.ScramClient::start(
     alg~,
-    username=jid,
+    username~,
     password~,
     nonce~,
     gs2~,
     cb_data~,
   )
-  let mut reply = self.sasl_auth(mechanism=mech, initial=first)
+  // SASL payloads are base64 without padding (RFC 4422); Prosody rejects
+  // padded ones with incorrect-encoding
+  let mut reply = self.sasl_auth(
+    mechanism=mech,
+    initial=@base64.encode(@utf8.encode(first)),
+  )
   for ;; {
     let text = match reply {
       Challenge(encoded) => decode_sasl_payload(encoded)
@@ -120,7 +137,9 @@ async fn Connection::scram_exchange(
         let final_msg = client.client_final(server_first=text) catch {
           err => raise XmppError::Auth(detail="\{Repr(err)}")
         }
-        reply = self.sasl_respond(payload=final_msg)
+        reply = self.sasl_respond(
+          payload=@base64.encode(@utf8.encode(final_msg)),
+        )
       }
       Success(_) => {
         client.verify_server_final(server_final=text) catch {

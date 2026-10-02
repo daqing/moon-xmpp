@@ -78,3 +78,36 @@ test "value forms are equivalent" {
   ])
   assert_eq(a, b)
 }
+
+///|
+test "usage mentions every flag" {
+  let u = usage()
+  assert_true(u.contains("--jid"))
+  assert_true(u.contains("--password"))
+  assert_true(u.contains("--to"))
+  assert_true(u.contains("--body"))
+  assert_true(u.contains("--host"))
+  assert_true(u.contains("--port"))
+  assert_true(u.contains("--resource"))
+}
+
+///|
+test "flag at the end without a value raises" {
+  try
+    parse_args([
+      "--jid", "u@e.com", "--password", "p", "--to", "t@e.com", "--body", "b", "--port",
+    ])
+  catch {
+    CliError::MissingArg(name=nm) => assert_eq(nm, "--port")
+    _ => fail("wrong error")
+  } noraise {
+    _ => fail("expected error")
+  }
+}
+
+///|
+test "program name is skipped" {
+  let args = program_args(["/path/to/main.exe", "--jid", "u@e.com"])
+  assert_eq(args, ["--jid", "u@e.com"])
+  assert_eq(program_args(["--jid", "u@e.com"]), ["--jid", "u@e.com"])
+}
