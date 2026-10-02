@@ -4,7 +4,7 @@ MoonBit 的 XMPP 客户端库，实现 XMPP Core（[RFC 6120](https://www.rfc-ed
 
 ## 项目状态
 
-**开发中。** moon-xmpp 是一个 MoonBit 黑客松参赛项目，仓库目前是项目骨架，协议实现正在进行中——构建顺序见下文「路线图」。
+**开发中。** moon-xmpp 是一个 MoonBit 黑客松参赛项目。核心会话生命周期（流、STARTTLS、SASL、绑定、presence、聊天）已实现并通过进程内回环服务器测试；接下来是对接真实 ejabberd 实例与 CLI 演示——见下文「路线图」。
 
 ## 它做什么
 
@@ -20,13 +20,13 @@ moon-xmpp 让 MoonBit 程序能够连接 ejabberd 这类标准 XMPP 服务器，
 
 | 能力 | 标准 | 状态 |
 | --- | --- | --- |
-| XML 流 | [RFC 6120 §4](https://www.rfc-editor.org/rfc/rfc6120#section-4) | 计划中 |
-| STARTTLS | [RFC 6120 §5](https://www.rfc-editor.org/rfc/rfc6120#section-5) | 计划中 |
-| SASL：PLAIN、SCRAM-SHA-1、SCRAM-SHA-256 | [RFC 4422](https://www.rfc-editor.org/rfc/rfc4422)、[RFC 4616](https://www.rfc-editor.org/rfc/rfc4616)、[RFC 5802](https://www.rfc-editor.org/rfc/rfc5802)、[RFC 7677](https://www.rfc-editor.org/rfc/rfc7677) | 计划中 |
-| 资源绑定 | [RFC 6120 §7](https://www.rfc-editor.org/rfc/rfc6120#section-7) | 计划中 |
-| 初始 presence | [RFC 6121 §4.2](https://www.rfc-editor.org/rfc/rfc6121#section-4.2) | 计划中 |
-| 聊天消息 | [RFC 6120 §8](https://www.rfc-editor.org/rfc/rfc6120#section-8)、[RFC 6121 §5.2](https://www.rfc-editor.org/rfc/rfc6121#section-5.2) | 计划中 |
-| JID 解析与规范化 | [RFC 8264](https://www.rfc-editor.org/rfc/rfc8264) | 计划中 |
+| XML 流 | [RFC 6120 §4](https://www.rfc-editor.org/rfc/rfc6120#section-4) | 已完成 |
+| STARTTLS | [RFC 6120 §5](https://www.rfc-editor.org/rfc/rfc6120#section-5) | 已完成 |
+| SASL：PLAIN、SCRAM-SHA-1、SCRAM-SHA-256 | [RFC 4422](https://www.rfc-editor.org/rfc/rfc4422)、[RFC 4616](https://www.rfc-editor.org/rfc/rfc4616)、[RFC 5802](https://www.rfc-editor.org/rfc/rfc5802)、[RFC 7677](https://www.rfc-editor.org/rfc/rfc7677) | 已完成 |
+| 资源绑定 | [RFC 6120 §7](https://www.rfc-editor.org/rfc/rfc6120#section-7) | 已完成 |
+| 初始 presence | [RFC 6121 §4.2](https://www.rfc-editor.org/rfc/rfc6121#section-4.2) | 已完成 |
+| 聊天消息 | [RFC 6120 §8](https://www.rfc-editor.org/rfc/rfc6120#section-8)、[RFC 6121 §5.2](https://www.rfc-editor.org/rfc/rfc6121#section-5.2) | 已完成 |
+| JID 解析与规范化 | [RFC 8264](https://www.rfc-editor.org/rfc/rfc8264) | 已完成 |
 
 ## 范围之外
 
@@ -82,12 +82,12 @@ moon run cmd/main -- \
 
 ## 路线图
 
-1. [ ] XML 流协商 — RFC 6120 §4
-2. [ ] STARTTLS — RFC 6120 §5
-3. [ ] SASL 认证：PLAIN、SCRAM-SHA-1、SCRAM-SHA-256
-4. [ ] 资源绑定 — RFC 6120 §7
-5. [ ] 初始 presence — RFC 6121 §4.2
-6. [ ] 聊天消息收发 — RFC 6120 §8、RFC 6121 §5.2
+1. [x] XML 流协商 — RFC 6120 §4
+2. [x] STARTTLS — RFC 6120 §5
+3. [x] SASL 认证：PLAIN、SCRAM-SHA-1、SCRAM-SHA-256
+4. [x] 资源绑定 — RFC 6120 §7
+5. [x] 初始 presence — RFC 6121 §4.2
+6. [x] 聊天消息收发 — RFC 6120 §8、RFC 6121 §5.2
 7. [ ] `cmd/main` 命令行演示
 
 ## 开发

@@ -31,45 +31,42 @@ pub extend Presence with Eq::{not_equal, equal}
 pub extend Presence with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
-/// Receive the next contact presence broadcast. Stanzas that are not
-/// presence (messages, iqs) are currently skipped; message reception
-/// arrives with the chat support.
+/// Receive the next contact presence broadcast. Chat messages and other
+/// stanzas encountered first are skipped; use `recv_stanza` to handle all
+/// stanza kinds.
 pub async fn Connection::recv_presence(
   self : Connection,
 ) -> Presence raise XmppError {
   for ;; {
-    match self.read_incoming() {
-      Header(_) =>
-        raise XmppError::ProtocolViolation(
-          detail="unexpected stream header while receiving presence",
-        )
-      Element(el) => {
-        if el.name != "presence" {
-          continue
-        }
-        let from : @jid.Jid? = match el.get_attribute("from") {
-          Some(f) =>
-            Some(
-              @jid.Jid::parse(f) catch {
-                err =>
-                  raise XmppError::ProtocolViolation(
-                    detail="invalid from in presence: \{Repr(err)}",
-                  )
-              },
-            )
-          None => None
-        }
-        let mut status : String? = None
-        for child in el.get_children() {
-          guard child is @XMLParser.XMLChildren::Element(e) else { continue }
-          if e.name == "status" {
-            status = Some(e.get_text())
-          }
-        }
-        return { from, presence_type: el.get_attribute("type"), status, }
-      }
+    match self.recv_stanza() {
+      Presence(p) => return p
+      _ => continue
     }
   }
+}
+
+///|
+fn parse_presence(el : @XMLParser.XMLElement) -> Presence raise XmppError {
+  let from : @jid.Jid? = match el.get_attribute("from") {
+    Some(f) =>
+      Some(
+        @jid.Jid::parse(f) catch {
+          err =>
+            raise XmppError::ProtocolViolation(
+              detail="invalid from in presence: \{Repr(err)}",
+            )
+        },
+      )
+    None => None
+  }
+  let mut status : String? = None
+  for child in el.get_children() {
+    guard child is @XMLParser.XMLChildren::Element(e) else { continue }
+    if e.name == "status" {
+      status = Some(element_text(e))
+    }
+  }
+  { from, presence_type: el.get_attribute("type"), status, }
 }
 
 ///|

@@ -5,7 +5,7 @@
 > - 编号规则：`T<阶段>.<序号>`，阶段内顺序即建议实施顺序。
 > - 进度规则：每完成一项就勾选；完成协议能力相关的任务后，同步更新 README（中英两份）的协议覆盖表状态与 Roadmap 复选框。
 > - 依赖关系：T1 → T2 → … → T8 依次依赖；**T9.1（本地 ejabberd 环境）建议提前到 T2 开始前完成**，因为从流协商起就需要真实服务器联调。JID、XML、SCRAM 等纯计算任务不依赖服务器，可随时穿插进行。
-> - 截至 2026-10-01：T1 至 T5 已完成，T6.1 至 T6.3 已完成。
+> - 截至 2026-10-01：T1 至 T6 已完成，T7.1 至 T7.3 已完成。
 
 ## T1 设计与基础
 
@@ -64,9 +64,9 @@
 
 目标：打通双向聊天，这是验收场景的核心。
 
-- [ ] T7.1 发送 chat message：`type='chat'` + `<body/>` + `to`，生成 stanza id
-- [ ] T7.2 接收 chat message：解析 `from` / `body`，按 T1.1 定型的 API 形态暴露给调用方
-- [ ] T7.3 未知内容健壮性：对不认识的 stanza 与子元素按 RFC 6120 的忽略规则处理，不崩溃
+- [x] T7.1 发送 chat message：`send_chat` 发出 `type='chat'`，生成 stanza id，body 做转义，守卫要求已绑定会话
+- [x] T7.2 接收 chat message：`recv_stanza` 分发 Chat / Presence / Other；`ChatMessage` 含 from、id、body；`recv_presence` 改为分发之上的过滤封装
+- [x] T7.3 未知内容健壮性：未知顶层元素归为 Other、未知子元素跳过，body 文本带完整实体解码（XML 解析器把实体引用存为独立子节点，get_text 会丢——测试抓出后已修）
 
 ## T8 CLI 演示（cmd/main）
 
