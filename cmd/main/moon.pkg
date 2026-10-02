@@ -1,9 +1,17 @@
 import {
+  "daqing/moon-xmpp/core",
   "daqing/moon-xmpp/jid",
+  "moonbitlang/async",
   "moonbitlang/core/debug",
+  "moonbitlang/core/env",
   "moonbitlang/core/string",
 }
 
-options(
-  "is-main": true,
-)
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/socket",
+  "moonbitlang/async/tls",
+  "moonbitlang/core/encoding/utf8",
+} for "wbtest"
+
+pkgtype(kind: "executable")
