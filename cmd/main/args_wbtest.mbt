@@ -104,3 +104,10 @@ test "flag at the end without a value raises" {
     _ => fail("expected error")
   }
 }
+
+///|
+test "program name is skipped" {
+  let args = program_args(["/path/to/main.exe", "--jid", "u@e.com"])
+  assert_eq(args, ["--jid", "u@e.com"])
+  assert_eq(program_args(["--jid", "u@e.com"]), ["--jid", "u@e.com"])
+}

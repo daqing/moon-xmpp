@@ -10,6 +10,10 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 case "${1:-}" in
   start)
+    if docker ps --format '{{.Names}}' | grep -q "^$NAME$"; then
+      echo "ejabberd is already running on 127.0.0.1:5222"
+      exit 0
+    fi
     mkdir -p "$ROOT/docker/certs"
     cat "$ROOT/core/testdata/test_cert.pem" "$ROOT/core/testdata/test_key.pem" \
       > "$ROOT/docker/certs/server.pem"

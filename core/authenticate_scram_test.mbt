@@ -56,7 +56,8 @@ async fn scram_loopback(alg~ : @sasl.ScramAlg, port~ : Int) -> Unit {
         let auth_open = require_index(buf, "<auth")
         let open = require_index(buf[auth_open:].to_owned(), ">") + auth_open
         let close = require_index(buf, "</auth>")
-        let first = buf[open + 1:close].to_owned()
+        let encoded = buf[open + 1:close].to_owned()
+        let first = @utf8.decode(@base64.decode(encoded))
         let bare = first["n,,".length():].to_owned()
         let client_nonce = test_attr(bare, "r")
         guard client_nonce is Some(cn) else { fail("missing client nonce") }
@@ -79,7 +80,9 @@ async fn scram_loopback(alg~ : @sasl.ScramAlg, port~ : Int) -> Unit {
         }
         let open2 = require_index(buf, "xmpp-sasl'>")
         let close2 = require_index(buf, "</response>")
-        let final_msg = buf[open2 + "xmpp-sasl'>".length():close2].to_owned()
+        let final_msg = @utf8.decode(
+          @base64.decode(buf[open2 + "xmpp-sasl'>".length():close2].to_owned()),
+        )
         assert_eq(test_attr(final_msg, "r"), Some("\{cn}3rfcNHYJY1ZVvWVs7j"))
         assert_eq(test_attr(final_msg, "c"), Some("biws"))
         // verify the client's proof with the known password; the

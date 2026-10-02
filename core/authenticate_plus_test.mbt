@@ -55,7 +55,8 @@ async test "authenticate with scram-sha-256-plus over tls" {
         let auth_open = require_index(s, "<auth")
         let open = require_index(s[auth_open:].to_owned(), ">") + auth_open
         let close = require_index(s, "</auth>")
-        let first = s[open + 1:close].to_owned()
+        let encoded = s[open + 1:close].to_owned()
+        let first = @utf8.decode(@base64.decode(encoded))
         // client-first = gs2 ",," bare; with binding the gs2 names the
         // binding and no "y" fallback is used
         let gs2 = "p=tls-server-end-point"
@@ -83,7 +84,9 @@ async test "authenticate with scram-sha-256-plus over tls" {
         let rs = resp_buf.to_string()
         let open2 = require_index(rs, "xmpp-sasl'>")
         let close2 = require_index(rs, "</response>")
-        let final_msg = rs[open2 + "xmpp-sasl'>".length():close2].to_owned()
+        let final_msg = @utf8.decode(
+          @base64.decode(rs[open2 + "xmpp-sasl'>".length():close2].to_owned()),
+        )
         assert_eq(test_attr(final_msg, "r"), Some("\{cn}WvBYaepP8S2csBkN"))
         // c= must decode to gs2 ",," plus the 32-byte binding data
         let c_b64 = test_attr(final_msg, "c")

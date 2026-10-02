@@ -20,6 +20,7 @@ pub struct CliOptions {
   host : String?
   port : Int?
   resource : String?
+  ca_file : String?
 } derive(Eq, Debug)
 
 ///|
@@ -30,7 +31,7 @@ pub extend CliOptions with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub fn usage() -> String {
-  "usage: moon run cmd/main -- --jid user@example.com --password secret --to peer@example.com --body \"hello\" [--host host] [--port 5222] [--resource name]"
+  "usage: moon run cmd/main -- --jid user@example.com --password secret --to peer@example.com --body \"hello\" [--host host] [--port 5222] [--resource name] [--ca-file pem]"
 }
 
 ///|
@@ -43,6 +44,7 @@ pub fn parse_args(args : Array[String]) -> CliOptions raise CliError {
   let mut host : String? = None
   let mut port : Int? = None
   let mut resource : String? = None
+  let mut ca_file : String? = None
   let mut i = 0
   while i < args.length() {
     let arg = args[i]
@@ -78,6 +80,7 @@ pub fn parse_args(args : Array[String]) -> CliOptions raise CliError {
         )
       }
       "--resource" => resource = Some(take_value())
+      "--ca-file" => ca_file = Some(take_value())
       _ => raise CliError::UnknownArg(arg~)
     }
     i += 1
@@ -98,7 +101,7 @@ pub fn parse_args(args : Array[String]) -> CliOptions raise CliError {
     Some(b) => b
     None => raise CliError::MissingArg(name="--body")
   }
-  { jid, password, to, body, host, port, resource, }
+  { jid, password, to, body, host, port, resource, ca_file, }
 }
 
 ///|
@@ -115,4 +118,18 @@ pub fn host_for(opts : CliOptions) -> String raise CliError {
         j => j.domainpart
       }
   }
+}
+
+///|
+/// The runtime passes the program name as the first argument; the CLI
+/// options start at the first `--`-prefixed argument.
+pub fn program_args(args : Array[String]) -> Array[String] {
+  let mut start = 0
+  while start < args.length() {
+    if args[start].has_prefix("--") {
+      break
+    }
+    start += 1
+  }
+  args[start:].to_owned()
 }

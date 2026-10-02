@@ -1,7 +1,7 @@
 ///|
 /// Entry point of the moon-xmpp demo CLI.
 async fn main {
-  let opts = parse_opts_or_usage()
+  let opts = parse_opts_or_usage(@env.args())
   let host = host_or_usage(opts)
   let port = match opts.port {
     Some(p) => p
@@ -14,9 +14,9 @@ async fn main {
 }
 
 ///|
-fn parse_opts_or_usage() -> CliOptions raise {
+fn parse_opts_or_usage(raw : Array[String]) -> CliOptions raise {
   errdefer println(usage())
-  parse_args(@env.args())
+  parse_args(program_args(raw))
 }
 
 ///|
