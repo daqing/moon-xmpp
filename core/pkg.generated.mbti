@@ -125,6 +125,7 @@ pub async fn Connection::read_raw_element(Self) -> String raise XmppError
 pub async fn Connection::restart_stream(Self, domain~ : String) -> Features raise XmppError
 pub async fn Connection::sasl_auth(Self, mechanism~ : String, initial~ : String) -> SaslReply raise XmppError
 pub async fn Connection::sasl_respond(Self, payload~ : String) -> SaslReply raise XmppError
+pub async fn Connection::send_initial_presence(Self) -> Unit raise XmppError
 pub async fn Connection::send_raw(Self, String) -> Unit raise XmppError
 pub async fn Connection::starttls(Self, domain~ : String, verify? : Bool) -> Features raise XmppError
 pub fn Connection::state(Self) -> ConnectionState
