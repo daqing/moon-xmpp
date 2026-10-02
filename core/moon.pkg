@@ -1,4 +1,5 @@
 import {
+  "daqing/moon-xmpp/jid",
   "daqing/moon-xmpp/sasl",
   "daqing/moon-xmpp/xml",
   "moonbit-community/XMLParser",

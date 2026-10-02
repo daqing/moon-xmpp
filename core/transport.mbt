@@ -13,6 +13,8 @@ pub struct Connection {
   priv mut stream_header : StreamHeader?
   priv mut features : Features?
   priv mut domain : String?
+  priv mut bound : @jid.Jid?
+  priv mut iq_counter : Int
   priv frames : Array[@xml.Frame]
   priv mut frame_pos : Int
 }
@@ -33,9 +35,17 @@ pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError 
     stream_header: None,
     features: None,
     domain: None,
+    bound: None,
+    iq_counter: 0,
     frames: [],
     frame_pos: 0,
   }
+}
+
+///|
+/// Return the full JID assigned by resource binding, once bound.
+pub fn Connection::bound_jid(self : Connection) -> @jid.Jid? {
+  self.bound
 }
 
 ///|
