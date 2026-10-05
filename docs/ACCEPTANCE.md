@@ -20,10 +20,11 @@ Both directions passed; the transcripts are stored as evidence:
 
 ## GUI run (completed)
 
-The same exchange was verified manually with Adium as alice@localhost
-(2026-10-02): the CLI's message arrived in the GUI, a reply typed in the GUI
-was printed by the running CLI, and the self-signed certificate was accepted
-via Adium's trust dialog. Screenshots were skipped by the author's decision.
+The same exchange was verified manually against a local prosody server
+(`scripts/prosody.sh`) with Adium on macOS as alice@localhost (2026-10-02):
+the CLI's message arrived in the GUI, a reply typed in the GUI was printed
+by the running CLI, and the self-signed certificate was accepted via
+Adium's trust dialog. Screenshots were skipped by the author's decision.
 
 ## 1. Start the server and accounts
 
@@ -33,7 +34,9 @@ scripts/prosody.sh register alice secret123
 scripts/prosody.sh register bob secret123
 ```
 
-(`scripts/ejabberd.sh` provides the same start/stop/register interface for
+(prosody is the reference server used by the recorded runs above — the
+ejabberd image misbehaves under amd64 emulation on Apple Silicon;
+`scripts/ejabberd.sh` provides the same start/stop/register interface for
 ejabberd on x86 hosts.)
 
 ## 2. Configure the third-party client

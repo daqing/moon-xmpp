@@ -6,12 +6,14 @@ An XMPP client library for MoonBit, implementing the client side of
 
 ## Status
 
-**Work in progress.** moon-xmpp is being developed as an entry for a MoonBit
-hackathon. The core session lifecycle (streams, STARTTLS, SASL, binding,
-presence, chat) is implemented, covered by 100+ tests, and verified against
-a real local XMPP server (see `scripts/e2e.sh`); GUI-client interop testing
-is the remaining step — see [Roadmap](#roadmap) and
-[docs/ACCEPTANCE.md](docs/ACCEPTANCE.md).
+moon-xmpp is an entry for a MoonBit hackathon. The core session lifecycle
+(streams, STARTTLS, SASL, resource binding, presence, chat) is implemented,
+covered by 100+ tests, and verified end to end: against a real local XMPP
+server (prosody), a chat message sent from moon-xmpp arrives in the Adium
+GUI client on macOS, and Adium's reply is received back by moon-xmpp. Interop was also
+verified automatically against [slixmpp](https://codeberg.org/poezio/slixmpp),
+an independent Python XMPP implementation. See
+[docs/ACCEPTANCE.md](docs/ACCEPTANCE.md) for the runs and transcripts.
 
 ## What it does
 
@@ -19,7 +21,8 @@ moon-xmpp lets MoonBit programs connect to standard XMPP servers such as
 ejabberd, log in securely, and exchange one-on-one chat messages that
 interoperate with off-the-shelf clients such as Psi, Gajim, or Conversations.
 
-The acceptance scenario for the project:
+The project's acceptance scenario — verified end to end (see
+[Status](#status)):
 
 1. moon-xmpp connects to an ejabberd server, negotiates STARTTLS,
    authenticates with SASL, and binds a resource.
@@ -42,7 +45,7 @@ The acceptance scenario for the project:
 ## Non-goals
 
 - Roster and presence subscription management (RFC 6121 §2–3) — out of scope
-  for now; may be revisited after the core works end to end.
+  for now; may be revisited in a later version.
 - XMPP extensions (XEPs), such as SASL2 (XEP-0388), Stream Management
   (XEP-0198), Message Carbons (XEP-0280), or MAM (XEP-0313).
 - Server-to-server (s2s) federation and any server-side functionality — this
@@ -101,9 +104,9 @@ moon run cmd/main -- \
 It connects (STARTTLS by default, `--host`/`--port` to override), logs in,
 binds a resource, goes online, sends the message, and then prints incoming
 messages and presence broadcasts until the stream ends. With a standard
-client (Psi, Gajim, Conversations) logged in as `bob@example.com`, the
-message arrives immediately; a reply sent from that client is printed by the
-running CLI.
+client (Adium, Psi, Gajim, Conversations) logged in as `bob@example.com`,
+the message arrives immediately; a reply sent from that client is printed
+by the running CLI.
 
 ## Roadmap
 

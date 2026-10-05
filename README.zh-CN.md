@@ -4,13 +4,13 @@ MoonBit 的 XMPP 客户端库，实现 XMPP Core（[RFC 6120](https://www.rfc-ed
 
 ## 项目状态
 
-**开发中。** moon-xmpp 是一个 MoonBit 黑客松参赛项目。核心会话生命周期（流、STARTTLS、SASL、绑定、presence、聊天）已实现，有 100+ 测试覆盖，并在真实本地 XMPP 服务器上完成集成验证（见 `scripts/e2e.sh`）；剩余步骤是与 GUI 客户端的互操作实测——见下文「路线图」与 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)。
+moon-xmpp 是一个 MoonBit 黑客松参赛项目。核心会话生命周期（流、STARTTLS、SASL、资源绑定、presence、聊天）已实现，有 100+ 测试覆盖，并已完成端到端验收：连接真实的本地 XMPP 服务器（prosody）后，moon-xmpp 发出的聊天消息实时到达 macOS 上的 Adium GUI 客户端，Adium 回复的消息也被 moon-xmpp 收到。此外还通过独立的 Python XMPP 实现 [slixmpp](https://codeberg.org/poezio/slixmpp) 做了自动化互操作验证。验收过程与记录见 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)。
 
 ## 它做什么
 
 moon-xmpp 让 MoonBit 程序能够连接 ejabberd 这类标准 XMPP 服务器，安全登录，并收发一对一聊天消息；消息可与 Psi、Gajim、Conversations 等现成客户端互通。
 
-本项目的验收场景：
+本项目的验收场景（已端到端验证通过，见「项目状态」）：
 
 1. moon-xmpp 连接一台 ejabberd 服务器，完成 STARTTLS 加密、SASL 认证与资源绑定。
 2. 向另一个账号发送聊天消息，消息在第三方客户端中实时到达。
@@ -30,7 +30,7 @@ moon-xmpp 让 MoonBit 程序能够连接 ejabberd 这类标准 XMPP 服务器，
 
 ## 范围之外
 
-- roster 与 presence 订阅管理（RFC 6121 §2–3）：暂不实现，核心链路打通后再评估。
+- roster 与 presence 订阅管理（RFC 6121 §2–3）：暂不实现，后续版本再评估。
 - 各类 XEP 扩展，如 SASL2（XEP-0388）、Stream Management（XEP-0198）、Message Carbons（XEP-0280）、MAM（XEP-0313）。
 - 服务器到服务器（s2s）互联及一切服务端功能——这是纯客户端库。
 
@@ -80,7 +80,7 @@ moon run cmd/main -- \
   --body 'Hello from MoonBit!'
 ```
 
-它会建立连接（默认 STARTTLS，可用 `--host`/`--port` 覆盖）、登录、绑定资源、上线、发送消息，然后持续打印收到的消息与 presence 广播，直到流结束。用标准客户端（Psi、Gajim、Conversations）登录 `bob@example.com`，消息会立刻到达；从该客户端发送回复，正在运行的 CLI 也会打印出来。
+它会建立连接（默认 STARTTLS，可用 `--host`/`--port` 覆盖）、登录、绑定资源、上线、发送消息，然后持续打印收到的消息与 presence 广播，直到流结束。用标准客户端（Adium、Psi、Gajim、Conversations）登录 `bob@example.com`，消息会立刻到达；从该客户端发送回复，正在运行的 CLI 也会打印出来。
 
 ## 路线图
 
