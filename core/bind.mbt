@@ -4,7 +4,7 @@
 /// advertised the bind feature (i.e. authentication already succeeded).
 pub async fn Connection::bind_resource(
   self : Connection,
-  resource? : String = "",
+  resource~ : String = "",
 ) -> @jid.Jid raise XmppError {
   let advertised = match self.features {
     Some(f) => f
@@ -67,12 +67,9 @@ pub async fn Connection::bind_resource(
 }
 
 ///|
-fn find_child(
-  el : @XMLParser.XMLElement,
-  name~ : String,
-) -> @XMLParser.XMLElement? {
+fn find_child(el : @xml.XMLElement, name~ : String) -> @xml.XMLElement? {
   for child in el.get_children() {
-    guard child is @XMLParser.XMLChildren::Element(e) else { continue }
+    guard child is @xml.XMLChildren::Element(e) else { continue }
     if e.name == name {
       return Some(e)
     }
@@ -83,11 +80,11 @@ fn find_child(
 ///|
 fn Connection::raise_iq_error(
   self : Connection,
-  el : @XMLParser.XMLElement,
+  el : @xml.XMLElement,
 ) -> Unit raise XmppError {
   let _ = self
   for child in el.get_children() {
-    guard child is @XMLParser.XMLChildren::Element(e) else { continue }
+    guard child is @xml.XMLChildren::Element(e) else { continue }
     if e.name is "error" {
       let stanza_error = StanzaError::parse(e)
       let text_part = match stanza_error.text {

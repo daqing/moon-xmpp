@@ -5,7 +5,7 @@
 pub fn plain(
   authcid~ : String,
   password~ : String,
-  authzid? : String = "",
+  authzid~ : String = "",
 ) -> String raise SaslError {
   reject_nul(authzid, field="authzid")
   reject_nul(authcid, field="authcid")

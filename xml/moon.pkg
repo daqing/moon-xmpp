@@ -1,8 +1,4 @@
 import {
-  "moonbit-community/XMLParser",
+  "Milky2018/xml" @xmlpull,
   "moonbitlang/core/debug",
 }
-
-import {
-  "moonbit-community/XMLParser",
-} for "test"

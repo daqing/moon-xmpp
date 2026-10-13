@@ -46,7 +46,7 @@ pub async fn Connection::recv_presence(
 }
 
 ///|
-fn parse_presence(el : @XMLParser.XMLElement) -> Presence raise XmppError {
+fn parse_presence(el : @xml.XMLElement) -> Presence raise XmppError {
   let from : @jid.Jid? = match el.get_attribute("from") {
     Some(f) =>
       Some(
@@ -61,7 +61,7 @@ fn parse_presence(el : @XMLParser.XMLElement) -> Presence raise XmppError {
   }
   let mut status : String? = None
   for child in el.get_children() {
-    guard child is @XMLParser.XMLChildren::Element(e) else { continue }
+    guard child is @xml.XMLChildren::Element(e) else { continue }
     if e.name == "status" {
       status = Some(element_text(e))
     }

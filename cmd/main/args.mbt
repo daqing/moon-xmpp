@@ -18,7 +18,7 @@ pub struct CliOptions {
   to : String
   body : String
   host : String?
-  port : Int?
+  port : Int32?
   resource : String?
   ca_file : String?
 } derive(Eq, Debug)
@@ -42,7 +42,7 @@ pub fn parse_args(args : Array[String]) -> CliOptions raise CliError {
   let mut to : String? = None
   let mut body : String? = None
   let mut host : String? = None
-  let mut port : Int? = None
+  let mut port : Int32? = None
   let mut resource : String? = None
   let mut ca_file : String? = None
   let mut i = 0

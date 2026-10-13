@@ -53,7 +53,7 @@ pub fn pbkdf2(
   alg~ : ScramAlg,
   password~ : Bytes,
   salt~ : Bytes,
-  iterations~ : Int,
+  iterations~ : Int32,
 ) -> FixedArray[Byte] {
   let first = concat_bytes(
     salt,

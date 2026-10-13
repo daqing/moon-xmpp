@@ -3,7 +3,7 @@
 /// server that streams the given outbound bytes and returns what it
 /// observed from the client.
 async fn online_loopback(
-  port~ : Int,
+  port~ : Int32,
   server~ : async (@socket.Tcp) -> Unit,
   client_flow~ : async (Connection) -> Unit,
 ) -> Unit {

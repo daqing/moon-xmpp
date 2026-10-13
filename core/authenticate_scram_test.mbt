@@ -1,6 +1,6 @@
 ///|
 /// Locate `needle` in `s`, failing the test when absent.
-fn require_index(s : String, needle : String) -> Int raise {
+fn require_index(s : String, needle : String) -> Int32 raise {
   match s.find(needle) {
     Some(i) => i
     None => fail("needle not found: \{needle}")
@@ -23,7 +23,7 @@ fn test_attr(msg : String, key : String) -> String? {
 /// client's proof with the known password ("pencil") and answers with a
 /// valid server signature.
 #warnings("-alert_internal")
-async fn scram_loopback(alg~ : @sasl.ScramAlg, port~ : Int) -> Unit {
+async fn scram_loopback(alg~ : @sasl.ScramAlg, port~ : Int32) -> Unit {
   let mech = match alg {
     @sasl.Sha1 => "SCRAM-SHA-1"
     @sasl.Sha256 => "SCRAM-SHA-256"

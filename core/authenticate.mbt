@@ -8,8 +8,8 @@ pub async fn Connection::authenticate(
   self : Connection,
   jid~ : String,
   password~ : String,
-  mechanism? : String? = None,
-  channel_binding? : Bool = false,
+  mechanism~ : String? = None,
+  channel_binding~ : Bool = false,
 ) -> Features raise XmppError {
   let advertised = match self.features {
     Some(f) => f

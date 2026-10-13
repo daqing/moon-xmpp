@@ -5,8 +5,8 @@
 pub async fn run(
   opts : CliOptions,
   host~ : String,
-  port~ : Int,
-  verify? : Bool = true,
+  port~ : Int32,
+  verify~ : Bool = true,
 ) -> @core.Connection raise @core.XmppError {
   let domain = (@jid.Jid::parse(opts.jid) catch {
       err =>

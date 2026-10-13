@@ -15,7 +15,7 @@
 - [x] T1.2 包结构已创建：jid / xml / sasl / core，各自拥有一个公开 suberror 错误类型（JidError、XmlError、SaslError、XmppError）；根包保持 facade 角色，后续用 `pub using` 再导出
 - [x] T1.3 JID 解析：`localpart@domainpart/resourcepart` 拆分与合法性校验（RFC 8264）——jid 包的 `Jid::parse`，含禁用字符与每段 1023 字节上限校验
 - [x] T1.4 JID 规范化：width map、case map 与 NFKC（RFC 8264）——case map 与 NFKC 来自 moonbit-community/unicode@0.5.2（已锁版本），width map 自实现；resourcepart 只做 width map、保留大小写
-- [x] T1.5 XML 层完成：`Framer` 把字节流切成 Root / Stanza / StreamEnd 帧（标签栈匹配，感知引号/注释/CDATA，StreamEnd 后可复用以支持流重启）；`parse_element` 把完整 stanza 交给 XMLParser@0.2.6 解析；序列化用 `escape_text` / `escape_attr`。注意：解析器会在子元素前后产出空文本节点，遍历 children 要按名字找而不是按下标
+- [x] T1.5 XML 层完成：`Framer` 把字节流切成 Root / Stanza / StreamEnd 帧（标签栈匹配，感知引号/注释/CDATA，StreamEnd 后可复用以支持流重启）；`parse_element` 把完整 stanza 交给 Milky2018/xml@0.6.0（pull 解析器）解析；序列化用 `escape_text` / `escape_attr`。遍历 children 要按名字找而不是按下标
 
 ## T2 XML 流（RFC 6120 §4）
 

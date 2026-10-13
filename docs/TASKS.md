@@ -38,9 +38,9 @@ Goal: settle the programming model and lay the JID and XML groundwork.
 - [x] T1.5 XML layer done: `Framer` splits the stream into Root / Stanza /
       StreamEnd frames (tag-stack matching, quote/comment/CDATA aware,
       reusable after StreamEnd for stream restarts); `parse_element` feeds
-      complete stanzas to XMLParser@0.2.6; serialization uses `escape_text`
-      / `escape_attr`. The parser emits empty text nodes around child
-      elements, so walk children by name rather than by index
+      complete stanzas to Milky2018/xml@0.6.0 (a pull parser); serialization
+      uses `escape_text` / `escape_attr`. Walk children by name rather than
+      by index
 
 ## T2 XML Streams (RFC 6120 §4)
 

@@ -3,7 +3,7 @@
 /// echoes nothing on its own. White-box: the session is fast-forwarded to
 /// Bound before the client flow runs.
 async fn presence_loopback(
-  port~ : Int,
+  port~ : Int32,
   server~ : async (@socket.Tcp) -> Unit,
   client_flow~ : async (Connection) -> Unit,
 ) -> Unit {

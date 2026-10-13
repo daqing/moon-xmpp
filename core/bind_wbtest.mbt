@@ -5,10 +5,10 @@
 /// deadlocking the group. The session is fast-forwarded to Authenticating
 /// state directly (white-box), since the SASL round is covered elsewhere.
 async fn bind_loopback(
-  port~ : Int,
+  port~ : Int32,
   resource_offered~ : String,
   reply_jid~ : String,
-  error_reply? : Bool = false,
+  error_reply~ : Bool = false,
   client_flow~ : async (Connection) -> Unit,
 ) -> Unit {
   let addr = @socket.Addr::parse("127.0.0.1:\{port}") catch {

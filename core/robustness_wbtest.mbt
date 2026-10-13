@@ -3,7 +3,7 @@
 /// of stanzas are ignored, and none of them may crash the session. These
 /// tests pin that behavior for the reception path.
 async fn unknown_content_test(
-  port~ : Int,
+  port~ : Int32,
   inbound~ : String,
   assert_flow~ : async (Connection) -> Unit,
 ) -> Unit {

@@ -15,14 +15,17 @@ pub struct Connection {
   priv mut features : Features?
   priv mut domain : String?
   priv mut bound : @jid.Jid?
-  priv mut iq_counter : Int
+  priv mut iq_counter : Int32
   priv frames : Array[@xml.Frame]
-  priv mut frame_pos : Int
+  priv mut frame_pos : Int32
 }
 
 ///|
 /// Connect to an XMPP server over TCP.
-pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError {
+pub async fn connect(
+  host~ : String,
+  port~ : Int32,
+) -> Connection raise XmppError {
   let tcp = @socket.Tcp::connect_to_host(host, port~) catch {
     err =>
       raise XmppError::Io(

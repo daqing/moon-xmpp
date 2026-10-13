@@ -26,7 +26,7 @@ preferred_target = "native"
 description = "An XMPP client library for MoonBit"
 
 import {
-  "moonbit-community/XMLParser@0.2.6",
+  "Milky2018/xml@0.6.0",
   "moonbit-community/unicode@0.5.2",
   "moonbitlang/async@0.22.4",
   "moonbitlang/x@0.5.5",
