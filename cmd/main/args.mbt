@@ -15,12 +15,15 @@ pub extend CliError with @moonbitlang/core/debug.Debug::{to_repr}
 pub struct CliOptions {
   jid : String
   password : String
-  to : String
-  body : String
+  to : String?
+  body : String?
   host : String?
   port : Int32?
   resource : String?
   ca_file : String?
+  roster : Bool
+  subscribe : String?
+  approve : String?
 } derive(Eq, Debug)
 
 ///|
@@ -31,7 +34,7 @@ pub extend CliOptions with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub fn usage() -> String {
-  "usage: moon run cmd/main -- --jid user@example.com --password secret --to peer@example.com --body \"hello\" [--host host] [--port 5222] [--resource name] [--ca-file pem]"
+  "usage: moon run cmd/main -- --jid user@example.com --password secret [--to peer@example.com --body \"hello\"] [--roster] [--subscribe peer@example.com] [--approve peer@example.com] [--host host] [--port 5222] [--resource name] [--ca-file pem]\n\nAt least one of --to/--body, --roster, --subscribe, or --approve is required."
 }
 
 ///|
@@ -45,6 +48,9 @@ pub fn parse_args(args : Array[String]) -> CliOptions raise CliError {
   let mut port : Int32? = None
   let mut resource : String? = None
   let mut ca_file : String? = None
+  let mut roster = false
+  let mut subscribe : String? = None
+  let mut approve : String? = None
   let mut i = 0
   while i < args.length() {
     let arg = args[i]
@@ -81,6 +87,9 @@ pub fn parse_args(args : Array[String]) -> CliOptions raise CliError {
       }
       "--resource" => resource = Some(take_value())
       "--ca-file" => ca_file = Some(take_value())
+      "--roster" => roster = true
+      "--subscribe" => subscribe = Some(take_value())
+      "--approve" => approve = Some(take_value())
       _ => raise CliError::UnknownArg(arg~)
     }
     i += 1
@@ -93,15 +102,34 @@ pub fn parse_args(args : Array[String]) -> CliOptions raise CliError {
     Some(p) => p
     None => raise CliError::MissingArg(name="--password")
   }
-  let to = match to {
-    Some(t) => t
-    None => raise CliError::MissingArg(name="--to")
+  match (to, body) {
+    (Some(_), None) => raise CliError::MissingArg(name="--body")
+    (None, Some(_)) => raise CliError::MissingArg(name="--to")
+    _ => ()
   }
-  let body = match body {
-    Some(b) => b
-    None => raise CliError::MissingArg(name="--body")
+  let has_action = match (to, roster, subscribe, approve) {
+    (Some(_), _, _, _) => true
+    (None, true, _, _) => true
+    (None, false, Some(_), _) => true
+    (None, false, None, Some(_)) => true
+    _ => false
   }
-  { jid, password, to, body, host, port, resource, ca_file, }
+  if !has_action {
+    raise CliError::MissingArg(name="--to")
+  }
+  {
+    jid,
+    password,
+    to,
+    body,
+    host,
+    port,
+    resource,
+    ca_file,
+    roster,
+    subscribe,
+    approve,
+  }
 }
 
 ///|

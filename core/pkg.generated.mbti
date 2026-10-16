@@ -126,18 +126,27 @@ pub async fn Connection::authenticate(Self, jid~ : String, password~ : String, m
 pub async fn Connection::bind_resource(Self, resource? : String) -> @jid.Jid raise XmppError
 pub fn Connection::bound_jid(Self) -> @jid.Jid?
 pub fn Connection::close(Self) -> Unit
+pub async fn Connection::get_roster(Self) -> Array[RosterItem] raise XmppError
 pub fn Connection::is_closed(Self) -> Bool
 pub fn Connection::is_encrypted(Self) -> Bool
 pub async fn Connection::open_stream(Self, domain~ : String) -> Features raise XmppError
 pub async fn Connection::read_raw_element(Self) -> String raise XmppError
 pub async fn Connection::recv_presence(Self) -> Presence raise XmppError
 pub async fn Connection::recv_stanza(Self) -> IncomingStanza raise XmppError
+pub async fn Connection::recv_subscription(Self) -> SubscriptionRequest raise XmppError
+pub async fn Connection::remove_roster_item(Self, jid~ : String) -> Unit raise XmppError
 pub async fn Connection::restart_stream(Self, domain~ : String) -> Features raise XmppError
+pub fn Connection::roster(Self) -> Array[RosterItem]
 pub async fn Connection::sasl_auth(Self, mechanism~ : String, initial~ : String) -> SaslReply raise XmppError
 pub async fn Connection::sasl_respond(Self, payload~ : String) -> SaslReply raise XmppError
 pub async fn Connection::send_chat(Self, to~ : String, body~ : String) -> String raise XmppError
 pub async fn Connection::send_initial_presence(Self) -> Unit raise XmppError
 pub async fn Connection::send_raw(Self, String) -> Unit raise XmppError
+pub async fn Connection::send_subscribe(Self, to~ : String) -> Unit raise XmppError
+pub async fn Connection::send_subscribed(Self, to~ : String) -> Unit raise XmppError
+pub async fn Connection::send_unsubscribe(Self, to~ : String) -> Unit raise XmppError
+pub async fn Connection::send_unsubscribed(Self, to~ : String) -> Unit raise XmppError
+pub async fn Connection::set_roster_item(Self, jid~ : String, name? : String, groups? : Array[String]) -> Unit raise XmppError
 pub async fn Connection::signoff(Self) -> Unit raise XmppError
 pub async fn Connection::starttls(Self, domain~ : String, verify? : Bool, ca_file? : String?) -> Features raise XmppError
 pub fn Connection::state(Self) -> ConnectionState
@@ -167,6 +176,8 @@ pub fn Features::to_repr(Self) -> @debug.Repr
 pub(all) enum IncomingStanza {
   Chat(ChatMessage)
   Presence(Presence)
+  RosterPush(RosterItem)
+  Subscription(SubscriptionRequest)
   Other
 } derive(Eq, @debug.Debug)
 pub fn IncomingStanza::equal(Self, Self) -> Bool
@@ -181,6 +192,27 @@ pub(all) struct Presence {
 pub fn Presence::equal(Self, Self) -> Bool
 pub fn Presence::not_equal(Self, Self) -> Bool
 pub fn Presence::to_repr(Self) -> @debug.Repr
+
+pub(all) enum PresenceSubscription {
+  Subscribe
+  Subscribed
+  Unsubscribe
+  Unsubscribed
+} derive(Eq, @debug.Debug)
+pub fn PresenceSubscription::equal(Self, Self) -> Bool
+pub fn PresenceSubscription::not_equal(Self, Self) -> Bool
+pub fn PresenceSubscription::to_repr(Self) -> @debug.Repr
+
+pub(all) struct RosterItem {
+  jid : @jid.Jid
+  name : String?
+  subscription : Subscription
+  ask : String?
+  groups : Array[String]
+} derive(Eq, @debug.Debug)
+pub fn RosterItem::equal(Self, Self) -> Bool
+pub fn RosterItem::not_equal(Self, Self) -> Bool
+pub fn RosterItem::to_repr(Self) -> @debug.Repr
 
 pub(all) enum SaslReply {
   Challenge(String)
@@ -220,6 +252,26 @@ pub struct StreamHeader {
 pub fn StreamHeader::equal(Self, Self) -> Bool
 pub fn StreamHeader::not_equal(Self, Self) -> Bool
 pub fn StreamHeader::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Subscription {
+  SubNone
+  SubTo
+  SubFrom
+  SubBoth
+  SubRemove
+} derive(Eq, @debug.Debug)
+pub fn Subscription::equal(Self, Self) -> Bool
+pub fn Subscription::not_equal(Self, Self) -> Bool
+pub fn Subscription::to_repr(Self) -> @debug.Repr
+
+pub(all) struct SubscriptionRequest {
+  kind : PresenceSubscription
+  from : @jid.Jid?
+  status : String?
+} derive(Eq, @debug.Debug)
+pub fn SubscriptionRequest::equal(Self, Self) -> Bool
+pub fn SubscriptionRequest::not_equal(Self, Self) -> Bool
+pub fn SubscriptionRequest::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

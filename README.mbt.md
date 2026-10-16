@@ -7,12 +7,14 @@ An XMPP client library for MoonBit, implementing the client side of
 ## Status
 
 moon-xmpp is an entry for a MoonBit hackathon. The core session lifecycle
-(streams, STARTTLS, SASL, resource binding, presence, chat) is implemented,
-covered by 100+ tests, and verified end to end: against a real local XMPP
-server (prosody), a chat message sent from moon-xmpp arrives in the Adium
-GUI client on macOS, and Adium's reply is received back by moon-xmpp. Interop was also
-verified automatically against [slixmpp](https://codeberg.org/poezio/slixmpp),
-an independent Python XMPP implementation. See
+(streams, STARTTLS, SASL, resource binding, presence, roster and presence
+subscription management, chat) is implemented, covered by 130+ tests, and
+verified end to end: against a real local XMPP server (prosody), a chat
+message sent from moon-xmpp arrives in the Adium GUI client on macOS, and
+Adium's reply is received back by moon-xmpp. Interop was also verified
+automatically against [slixmpp](https://codeberg.org/poezio/slixmpp), an
+independent Python XMPP implementation — for chat, and for roster fetches,
+subscription authorization, and presence broadcasts. See
 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md) for the runs and transcripts.
 
 ## What it does
@@ -29,6 +31,10 @@ The project's acceptance scenario — verified end to end (see
 2. It sends a chat message to another account; the message shows up in a
    third-party client in real time.
 3. A reply sent from that client is received by moon-xmpp.
+4. It fetches its roster and manages presence subscriptions with that
+   client; the client's authorization request is surfaced rather than
+   auto-answered, and once authorization is mutual, presence broadcasts
+   flow in both directions.
 
 ## Protocol coverage
 
@@ -39,13 +45,15 @@ The project's acceptance scenario — verified end to end (see
 | SASL: PLAIN, SCRAM-SHA-1, SCRAM-SHA-256 | [RFC 4422](https://www.rfc-editor.org/rfc/rfc4422), [RFC 4616](https://www.rfc-editor.org/rfc/rfc4616), [RFC 5802](https://www.rfc-editor.org/rfc/rfc5802), [RFC 7677](https://www.rfc-editor.org/rfc/rfc7677) | done |
 | Resource binding | [RFC 6120 §7](https://www.rfc-editor.org/rfc/rfc6120#section-7) | done |
 | Initial presence | [RFC 6121 §4.2](https://www.rfc-editor.org/rfc/rfc6121#section-4.2) | done |
+| Roster: get, set, push | [RFC 6121 §2](https://www.rfc-editor.org/rfc/rfc6121#section-2) | done |
+| Presence subscriptions | [RFC 6121 §3](https://www.rfc-editor.org/rfc/rfc6121#section-3) | done |
 | Chat messages | [RFC 6120 §8](https://www.rfc-editor.org/rfc/rfc6120#section-8), [RFC 6121 §5.2](https://www.rfc-editor.org/rfc/rfc6121#section-5.2) | done |
 | JID parsing and normalization | [RFC 8264](https://www.rfc-editor.org/rfc/rfc8264) | done |
 
 ## Non-goals
 
-- Roster and presence subscription management (RFC 6121 §2–3) — out of scope
-  for now; may be revisited in a later version.
+- Roster versioning (RFC 6121 §2.6): roster fetches always request the full
+  list.
 - XMPP extensions (XEPs), such as SASL2 (XEP-0388), Stream Management
   (XEP-0198), Message Carbons (XEP-0280), or MAM (XEP-0313).
 - Server-to-server (s2s) federation and any server-side functionality — this
@@ -82,8 +90,10 @@ async fn main {
   ignore(conn.authenticate(jid="alice@example.com", password="secret"))
   ignore(conn.bind_resource(resource="laptop"))
   conn.send_initial_presence()
+  ignore(conn.get_roster())
+  ignore(conn.send_subscribe(to="bob@example.com"))
   let id = conn.send_chat(to="bob@example.com", body="Hello from MoonBit!")
-  let stanza = conn.recv_stanza() // Chat / Presence / Other
+  let stanza = conn.recv_stanza() // Chat / Presence / RosterPush / Subscription / Other
 }
 ```
 
@@ -108,6 +118,18 @@ client (Adium, Psi, Gajim, Conversations) logged in as `bob@example.com`,
 the message arrives immediately; a reply sent from that client is printed
 by the running CLI.
 
+It can also fetch the roster and drive the subscription handshake:
+
+```bash
+moon run cmd/main -- --jid alice@example.com --password '…' --roster
+moon run cmd/main -- --jid alice@example.com --password '…' \
+  --subscribe bob@example.com --approve bob@example.com
+```
+
+`--roster` prints the fetched roster, `--subscribe` asks to see a contact's
+presence, and `--approve` grants a contact's request. Incoming requests are
+printed and never answered automatically.
+
 ## Roadmap
 
 1. [x] XML stream negotiation — RFC 6120 §4
@@ -117,6 +139,8 @@ by the running CLI.
 5. [x] Initial presence — RFC 6121 §4.2
 6. [x] Chat message send/receive — RFC 6120 §8, RFC 6121 §5.2
 7. [x] CLI demo in `cmd/main`
+8. [x] Roster: get, set, push — RFC 6121 §2
+9. [x] Presence subscriptions — RFC 6121 §3
 
 ## Development
 
@@ -137,6 +161,7 @@ scripts/prosody.sh start                    # or scripts/ejabberd.sh on x86
 scripts/prosody.sh register alice secret123
 scripts/prosody.sh register bob secret123
 scripts/e2e.sh                              # two-direction delivery test
+scripts/roster.sh                           # roster and subscription test
 ```
 
 ## License

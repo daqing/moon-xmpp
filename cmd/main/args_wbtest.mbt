@@ -7,8 +7,8 @@ test "parse full argument set" {
   ])
   assert_eq(opts.jid, "user@example.com")
   assert_eq(opts.password, "secret")
-  assert_eq(opts.to, "bob@example.com")
-  assert_eq(opts.body, "hello world")
+  assert_eq(opts.to, Some("bob@example.com"))
+  assert_eq(opts.body, Some("hello world"))
   assert_eq(opts.host, Some("xmpp.example.net"))
   assert_eq(opts.port, Some(5223))
   assert_eq(opts.resource, Some("laptop"))
@@ -80,6 +80,15 @@ test "value forms are equivalent" {
 }
 
 ///|
+test "--roster takes no value" {
+  let opts = parse_args([
+    "--jid", "u@e.com", "--password", "p", "--roster", "--subscribe", "t@e.com",
+  ])
+  assert_eq(opts.roster, true)
+  assert_eq(opts.subscribe, Some("t@e.com"))
+}
+
+///|
 test "usage mentions every flag" {
   let u = usage()
   assert_true(u.contains("--jid"))
@@ -89,6 +98,44 @@ test "usage mentions every flag" {
   assert_true(u.contains("--host"))
   assert_true(u.contains("--port"))
   assert_true(u.contains("--resource"))
+  assert_true(u.contains("--roster"))
+  assert_true(u.contains("--subscribe"))
+  assert_true(u.contains("--approve"))
+}
+
+///|
+test "roster and subscription actions parse without a message" {
+  let opts = parse_args([
+    "--jid", "user@example.com", "--password", "s", "--roster",
+  ])
+  assert_eq(opts.roster, true)
+  assert_eq(opts.to, None)
+  assert_eq(opts.subscribe, None)
+  let opts = parse_args([
+    "--jid", "user@example.com", "--password", "s", "--subscribe", "peer@example.com",
+    "--approve", "other@example.com",
+  ])
+  assert_eq(opts.subscribe, Some("peer@example.com"))
+  assert_eq(opts.approve, Some("other@example.com"))
+  assert_eq(opts.roster, false)
+}
+
+///|
+test "an action-less or half-specified invocation raises" {
+  try parse_args(["--jid", "u@e.com", "--password", "p"]) catch {
+    CliError::MissingArg(name=nm) => assert_eq(nm, "--to")
+    _ => fail("wrong error")
+  } noraise {
+    _ => fail("expected error")
+  }
+  try
+    parse_args(["--jid", "u@e.com", "--password", "p", "--to", "t@e.com"])
+  catch {
+    CliError::MissingArg(name=nm) => assert_eq(nm, "--body")
+    _ => fail("wrong error")
+  } noraise {
+    _ => fail("expected error")
+  }
 }
 
 ///|

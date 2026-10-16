@@ -10,6 +10,8 @@ pub async fn receive_loop(
     match conn.recv_stanza() {
       Chat(msg) => print(format_chat(msg))
       Presence(p) => print(format_presence(p))
+      RosterPush(item) => print(format_roster_push(item))
+      Subscription(req) => print(format_subscription(req))
       Other => ()
     }
   }
@@ -38,4 +40,28 @@ fn format_presence(p : @core.Presence) -> String {
     Some(s) => "* \{from} is \{what}: \{s}"
     None => "* \{from} is \{what}"
   }
+}
+
+///|
+fn format_roster_push(item : @core.RosterItem) -> String {
+  "* roster: \{item.jid.bare().to_string()} \{item.subscription.to_repr()}"
+}
+
+///|
+fn format_roster_item(item : @core.RosterItem) -> String {
+  let name = match item.name {
+    Some(n) => n
+    None => ""
+  }
+  let groups = item.groups.join(",")
+  "* \{item.jid.bare().to_string()} name=\"\{name}\" subscription=\{item.subscription.to_repr()} groups=[\{groups}]"
+}
+
+///|
+fn format_subscription(req : @core.SubscriptionRequest) -> String {
+  let from = match req.from {
+    Some(f) => f.to_string()
+    None => "(unknown)"
+  }
+  "* subscription \{req.kind.to_repr()} from \{from}"
 }

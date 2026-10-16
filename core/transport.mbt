@@ -16,6 +16,8 @@ pub struct Connection {
   priv mut domain : String?
   priv mut bound : @jid.Jid?
   priv mut iq_counter : Int32
+  priv mut roster : Array[RosterItem]
+  priv pending : Array[IncomingStanza]
   priv frames : Array[@xml.Frame]
   priv mut frame_pos : Int32
 }
@@ -42,6 +44,8 @@ pub async fn connect(
     domain: None,
     bound: None,
     iq_counter: 0,
+    roster: [],
+    pending: [],
     frames: [],
     frame_pos: 0,
   }

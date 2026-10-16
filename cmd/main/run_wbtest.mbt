@@ -86,12 +86,15 @@ async test "run completes the full chain and delivers the chat message" {
     let opts : CliOptions = {
       jid: "user@example.com",
       password: "secret",
-      to: "bob@example.com",
-      body: "hello from the cli",
+      to: Some("bob@example.com"),
+      body: Some("hello from the cli"),
       host: Some("127.0.0.1"),
       port: Some(46853),
       resource: None,
       ca_file: None,
+      roster: false,
+      subscribe: None,
+      approve: None,
     }
     let conn = run(opts, host="127.0.0.1", port=46853, verify=false)
     assert_eq(conn.state(), Online)

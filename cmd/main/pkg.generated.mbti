@@ -33,12 +33,15 @@ pub fn CliError::to_repr(Self) -> @debug.Repr
 pub struct CliOptions {
   jid : String
   password : String
-  to : String
-  body : String
+  to : String?
+  body : String?
   host : String?
   port : Int?
   resource : String?
   ca_file : String?
+  roster : Bool
+  subscribe : String?
+  approve : String?
 } derive(Eq, @debug.Debug)
 pub fn CliOptions::equal(Self, Self) -> Bool
 pub fn CliOptions::not_equal(Self, Self) -> Bool

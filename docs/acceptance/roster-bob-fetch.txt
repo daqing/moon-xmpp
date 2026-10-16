@@ -1,0 +1,4 @@
+roster: 1 item(s)
+* alice@localhost name="" subscription=SubBoth groups=[]
+* bob@localhost/jhWX9LE8cFeZ is available
+* alice@localhost/XW_B1UDTuofO is available

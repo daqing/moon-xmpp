@@ -41,6 +41,8 @@ pub extend ChatMessage with @moonbitlang/core/debug.Debug::{to_repr}
 pub(all) enum IncomingStanza {
   Chat(ChatMessage)
   Presence(Presence)
+  RosterPush(RosterItem)
+  Subscription(SubscriptionRequest)
   Other
 } derive(Eq, Debug)
 
@@ -55,19 +57,38 @@ pub extend IncomingStanza with @moonbitlang/core/debug.Debug::{to_repr}
 pub async fn Connection::recv_stanza(
   self : Connection,
 ) -> IncomingStanza raise XmppError {
-  for ;; {
-    match self.read_incoming() {
-      Header(_) =>
-        raise XmppError::ProtocolViolation(
-          detail="unexpected stream header while receiving a stanza",
-        )
-      Element(el) =>
-        match el.name {
-          "message" => return Chat(parse_chat(el))
-          "presence" => return Presence(parse_presence(el))
-          _ => return Other
-        }
+  if self.pending.length() > 0 {
+    return self.pending.remove(0)
+  }
+  let el = match self.read_incoming() {
+    Element(el) => el
+    Header(_) =>
+      raise XmppError::ProtocolViolation(
+        detail="unexpected stream header while receiving a stanza",
+      )
+  }
+  if el.name is "iq" {
+    match self.handle_iq(el) {
+      Some(event) => return event
+      None => return Other
     }
+  }
+  classify_stanza(el)
+}
+
+///|
+/// Turn a received element into a stanza event. Presence subscription
+/// stanzas are surfaced separately from availability broadcasts so callers
+/// can answer them deliberately (RFC 6121 §3.1.3).
+fn classify_stanza(el : @xml.XMLElement) -> IncomingStanza raise XmppError {
+  match el.name {
+    "message" => Chat(parse_chat(el))
+    "presence" =>
+      match parse_subscription_kind(el) {
+        Some(kind) => Subscription(parse_subscription_request(el, kind~))
+        None => Presence(parse_presence(el))
+      }
+    _ => Other
   }
 }
 

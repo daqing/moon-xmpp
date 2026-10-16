@@ -1,0 +1,10 @@
+alice (slixmpp) online
+alice asked to see bob's presence
+alice sees alice@localhost/XW_B1UDTuofO available
+alice got a subscribe request from bob@localhost
+alice sees bob@localhost/KiPV0eyVpx5Z available
+alice sees bob@localhost/KiPV0eyVpx5Z available
+alice sees bob@localhost/KiPV0eyVpx5Z available
+alice sees bob@localhost/KiPV0eyVpx5Z available
+alice sees bob@localhost/KiPV0eyVpx5Z available
+alice sees bob@localhost/jhWX9LE8cFeZ available
