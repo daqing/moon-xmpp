@@ -8,7 +8,7 @@ import {
 }
 
 // Values
-pub async fn connect(host~ : String, port~ : Int) -> Connection raise XmppError
+pub async fn connect(host~ : String, port~ : Int32) -> Connection raise XmppError
 
 pub fn select_mechanism(features~ : Features, encrypted~ : Bool, channel_binding? : Bool) -> String?
 

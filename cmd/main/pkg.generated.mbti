@@ -15,7 +15,7 @@ pub fn program_args(Array[String]) -> Array[String]
 
 pub async fn receive_loop(@core.Connection, print~ : (String) -> Unit) -> Unit raise @core.XmppError
 
-pub async fn run(CliOptions, host~ : String, port~ : Int, verify? : Bool) -> @core.Connection raise @core.XmppError
+pub async fn run(CliOptions, host~ : String, port~ : Int32, verify? : Bool) -> @core.Connection raise @core.XmppError
 
 pub fn usage() -> String
 
@@ -36,7 +36,7 @@ pub struct CliOptions {
   to : String?
   body : String?
   host : String?
-  port : Int?
+  port : Int32?
   resource : String?
   ca_file : String?
   roster : Bool
