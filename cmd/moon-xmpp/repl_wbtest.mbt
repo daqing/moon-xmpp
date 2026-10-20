@@ -202,7 +202,15 @@ async test "repl loop dispatches commands onto the connection" {
       }
     }
     let output : Array[String] = []
-    repl_loop(conn, read_line~, print=fn(line) { output.push(line) })
+    let prompts : Array[Unit] = []
+    let prompt = fn() { prompts.push(()) }
+    repl_loop(
+      conn,
+      read_line~,
+      print_line=fn(line) { output.push(line) },
+      prompt~,
+    )
+    assert_eq(prompts.length(), input.length())
     let text = output.join("\n")
     assert_true(text.contains("commands:"))
     assert_true(text.contains("roster: 1 item(s)"))

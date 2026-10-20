@@ -101,35 +101,35 @@ pub fn repl_help() -> String {
 async fn execute_repl_command(
   conn : @core.Connection,
   cmd : ReplCommand,
-  print~ : (String) -> Unit,
+  print_line~ : (String) -> Unit,
 ) -> Unit raise @core.XmppError {
   match cmd {
     Roster => {
       let items = conn.roster()
-      print("roster: \{items.length()} item(s)")
+      print_line("roster: \{items.length()} item(s)")
       for item in items {
-        print(format_roster_item(item))
+        print_line(format_roster_item(item))
       }
     }
     Send(to~, body~) => {
       let id = conn.send_chat(to~, body~)
-      print("message \{id} sent to \{to}")
+      print_line("message \{id} sent to \{to}")
     }
     Subscribe(jid~) => {
       conn.send_subscribe(to=jid)
-      print("* subscription request sent to \{jid}")
+      print_line("* subscription request sent to \{jid}")
     }
     Approve(jid~) => {
       conn.send_subscribed(to=jid)
-      print("* approved subscription from \{jid}")
+      print_line("* approved subscription from \{jid}")
     }
     Unsubscribe(jid~) => {
       conn.send_unsubscribe(to=jid)
-      print("* unsubscribed from \{jid}")
+      print_line("* unsubscribed from \{jid}")
     }
     Deny(jid~) => {
       conn.send_unsubscribed(to=jid)
-      print("* refused subscription from \{jid}")
+      print_line("* refused subscription from \{jid}")
     }
     Empty | Help | Quit | Unknown(_) | MissingArgument(_) => ()
   }
@@ -138,7 +138,9 @@ async fn execute_repl_command(
 ///|
 /// Read commands from `read_line` and dispatch them on `conn` until the
 /// input reaches EOF or the user types `quit`. Command failures are printed
-/// and do not end the session.
+/// and do not end the session. `prompt` writes the input prompt without a
+/// trailing newline, so it needs its own writer: `print_line` always ends a
+/// line.
 ///
 /// The roster is served from the connection's cache so that only the
 /// background receive loop reads from the socket; callers should fetch the
@@ -146,11 +148,12 @@ async fn execute_repl_command(
 pub async fn repl_loop(
   conn : @core.Connection,
   read_line~ : async () -> String?,
-  print~ : (String) -> Unit,
+  print_line~ : (String) -> Unit,
+  prompt~ : () -> Unit,
 ) -> Unit {
-  print("moon-xmpp repl. Type 'help' for commands, 'quit' to exit.")
+  print_line("moon-xmpp repl. Type 'help' for commands, 'quit' to exit.")
   for ;; {
-    print("> ")
+    prompt()
     let line = match (read_line() catch { _ => None }) {
       Some(line) => line
       None => break
@@ -158,14 +161,15 @@ pub async fn repl_loop(
     match parse_repl_command(line) {
       Empty => ()
       Quit => break
-      Help => print(repl_help())
-      Unknown(name~) => print("unknown command: \{name} (type 'help' for help)")
-      MissingArgument(usage~) => print("usage: \{usage}")
+      Help => print_line(repl_help())
+      Unknown(name~) =>
+        print_line("unknown command: \{name} (type 'help' for help)")
+      MissingArgument(usage~) => print_line("usage: \{usage}")
       cmd =>
-        execute_repl_command(conn, cmd, print~) catch {
-          err => print("error: \{Repr(err)}")
+        execute_repl_command(conn, cmd, print_line~) catch {
+          err => print_line("error: \{Repr(err)}")
         }
     }
   }
-  print("bye")
+  print_line("bye")
 }

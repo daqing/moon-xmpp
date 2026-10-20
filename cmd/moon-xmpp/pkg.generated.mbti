@@ -19,7 +19,7 @@ pub async fn receive_loop(@core.Connection, print~ : (String) -> Unit) -> Unit r
 
 pub fn repl_help() -> String
 
-pub async fn repl_loop(@core.Connection, read_line~ : async () -> String?, print~ : (String) -> Unit) -> Unit
+pub async fn repl_loop(@core.Connection, read_line~ : async () -> String?, print_line~ : (String) -> Unit, prompt~ : () -> Unit) -> Unit
 
 pub async fn run(CliOptions, host~ : String, port~ : Int32, verify? : Bool) -> @core.Connection raise @core.XmppError
 

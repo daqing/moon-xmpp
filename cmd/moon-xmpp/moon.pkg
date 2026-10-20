@@ -16,3 +16,7 @@ import {
 } for "wbtest"
 
 pkgtype(kind: "executable")
+
+options(
+  "native-stub": [ "prompt.c" ],
+)

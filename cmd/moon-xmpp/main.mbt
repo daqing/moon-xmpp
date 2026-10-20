@@ -34,7 +34,14 @@ async fn repl_session(conn : @core.Connection) -> Unit {
     },
   )
   @async.any([
-    () => repl_loop(conn, read_line=read_stdin, print=println),
+    () => {
+      repl_loop(
+        conn,
+        read_line=read_stdin,
+        print_line=println,
+        prompt=write_prompt,
+      )
+    },
     () => receive_loop(conn, print=println),
   ])
 }
@@ -44,6 +51,17 @@ async fn read_stdin() -> String? {
   @stdio.stdin.read_until("\n") catch {
     _ => None
   }
+}
+
+///|
+/// Write the REPL prompt without a newline and flush it. `println` always
+/// terminates the line, so the prompt goes through the same C stdout buffer
+/// via a small native stub; that keeps it ordered with the line output.
+extern "C" fn write_prompt_ffi() -> Unit = "moon_xmpp_write_prompt"
+
+///|
+fn write_prompt() -> Unit {
+  write_prompt_ffi()
 }
 
 ///|
