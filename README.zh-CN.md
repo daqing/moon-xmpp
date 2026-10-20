@@ -73,29 +73,41 @@ async fn main {
 
 ## 演示
 
-`cmd/main` 下有一个小型命令行客户端：
+`cmd/moon-xmpp` 下有一个小型命令行客户端。只给凭据时，它会连接服务器并自动进入交互式 REPL：
 
 ```bash
 git clone https://github.com/daqing/moon-xmpp
 cd moon-xmpp
-moon run cmd/main -- \
+moon run cmd/moon-xmpp -- \
   --jid alice@example.com \
-  --password '…' \
-  --to bob@example.com \
-  --body 'Hello from MoonBit!'
+  --password '…'
 ```
 
-它会建立连接（默认 STARTTLS，可用 `--host`/`--port` 覆盖）、登录、绑定资源、上线、发送消息，然后持续打印收到的消息与 presence 广播，直到流结束。用标准客户端（Adium、Psi、Gajim、Conversations）登录 `bob@example.com`，消息会立刻到达；从该客户端发送回复，正在运行的 CLI 也会打印出来。
+REPL 支持以下命令：
 
-它也可以拉取 roster 并驱动订阅握手：
+| 命令 | 作用 |
+| --- | --- |
+| `roster` | 打印缓存的 roster |
+| `send <jid> <message>` | 发送聊天消息 |
+| `subscribe <jid>` | 请求查看某个联系人的 presence |
+| `approve <jid>` | 同意对方的订阅请求 |
+| `unsubscribe <jid>` | 停止接收某个联系人的 presence |
+| `deny <jid>` | 拒绝对方的订阅请求 |
+| `help` | 列出所有命令 |
+| `quit` | 关闭会话（也可用 `exit`，或输入 EOF） |
+
+REPL 等待输入期间，收到的聊天消息和 presence 广播仍会实时打印出来。登录、联系人管理和发消息的完整示例见 [docs/REPL.zh-CN.md](docs/REPL.zh-CN.md)。
+
+一次性动作无需 REPL；加上 `--repl` 可以在动作执行完后进入 REPL：
 
 ```bash
-moon run cmd/main -- --jid alice@example.com --password '…' --roster
-moon run cmd/main -- --jid alice@example.com --password '…' \
-  --subscribe bob@example.com --approve bob@example.com
+moon run cmd/moon-xmpp -- --jid alice@example.com --password '…' \
+  --to bob@example.com --body 'Hello from MoonBit!'
+moon run cmd/moon-xmpp -- --jid alice@example.com --password '…' \
+  --roster --subscribe bob@example.com --approve bob@example.com --repl
 ```
 
-`--roster` 打印拉取到的 roster，`--subscribe` 请求查看某个联系人的 presence，`--approve` 同意对方的订阅请求。收到的订阅请求只会被打印出来，绝不自动回复。
+客户端会建立连接（默认 STARTTLS，可用 `--host`/`--port` 覆盖）、登录、绑定资源并上线。`--roster` 打印拉取到的 roster，`--subscribe` 请求查看某个联系人的 presence，`--approve` 同意对方的订阅请求。收到的订阅请求只会被打印出来，绝不自动回复。不加 `--repl` 时，客户端会持续打印收到的 stanza，直到流结束。
 
 ## 路线图
 
@@ -105,7 +117,7 @@ moon run cmd/main -- --jid alice@example.com --password '…' \
 4. [x] 资源绑定 — RFC 6120 §7
 5. [x] 初始 presence — RFC 6121 §4.2
 6. [x] 聊天消息收发 — RFC 6120 §8、RFC 6121 §5.2
-7. [x] `cmd/main` 命令行演示
+7. [x] `cmd/moon-xmpp` 命令行演示，支持交互式 REPL
 8. [x] roster：拉取、修改、推送 — RFC 6121 §2
 9. [x] presence 订阅管理 — RFC 6121 §3
 

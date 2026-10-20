@@ -99,36 +99,50 @@ async fn main {
 
 ## Demo
 
-A small CLI lives in `cmd/main`:
+A small CLI lives in `cmd/moon-xmpp`. Given only credentials, it connects
+and drops into an interactive REPL:
 
 ```bash
 git clone https://github.com/daqing/moon-xmpp
 cd moon-xmpp
-moon run cmd/main -- \
+moon run cmd/moon-xmpp -- \
   --jid alice@example.com \
-  --password '…' \
-  --to bob@example.com \
-  --body 'Hello from MoonBit!'
+  --password '…'
 ```
 
-It connects (STARTTLS by default, `--host`/`--port` to override), logs in,
-binds a resource, goes online, sends the message, and then prints incoming
-messages and presence broadcasts until the stream ends. With a standard
-client (Adium, Psi, Gajim, Conversations) logged in as `bob@example.com`,
-the message arrives immediately; a reply sent from that client is printed
-by the running CLI.
+The REPL accepts these commands:
 
-It can also fetch the roster and drive the subscription handshake:
+| Command | Effect |
+| --- | --- |
+| `roster` | print the cached roster |
+| `send <jid> <message>` | send a chat message |
+| `subscribe <jid>` | ask to see a contact's presence |
+| `approve <jid>` | accept a subscription request |
+| `unsubscribe <jid>` | stop receiving a contact's presence |
+| `deny <jid>` | refuse a subscription request |
+| `help` | list the commands |
+| `quit` | close the session (also `exit`, or EOF) |
+
+Incoming chat messages and presence broadcasts are printed while the REPL is
+waiting for input. See [docs/REPL.md](docs/REPL.md) for a walkthrough of
+logging in, managing contacts, and sending messages.
+
+One-shot actions work without the REPL. Add `--repl` to enter it after the
+actions run:
 
 ```bash
-moon run cmd/main -- --jid alice@example.com --password '…' --roster
-moon run cmd/main -- --jid alice@example.com --password '…' \
-  --subscribe bob@example.com --approve bob@example.com
+moon run cmd/moon-xmpp -- --jid alice@example.com --password '…' \
+  --to bob@example.com --body 'Hello from MoonBit!'
+moon run cmd/moon-xmpp -- --jid alice@example.com --password '…' \
+  --roster --subscribe bob@example.com --approve bob@example.com --repl
 ```
 
-`--roster` prints the fetched roster, `--subscribe` asks to see a contact's
-presence, and `--approve` grants a contact's request. Incoming requests are
-printed and never answered automatically.
+The CLI connects (STARTTLS by default, `--host`/`--port` to override), logs
+in, binds a resource, and goes online. `--roster` prints the fetched roster,
+`--subscribe` asks to see a contact's presence, and `--approve` grants a
+contact's request. Incoming requests are printed and never answered
+automatically. Without `--repl`, the client keeps printing incoming
+stanzas until the stream ends.
 
 ## Roadmap
 
@@ -138,7 +152,7 @@ printed and never answered automatically.
 4. [x] Resource binding — RFC 6120 §7
 5. [x] Initial presence — RFC 6121 §4.2
 6. [x] Chat message send/receive — RFC 6120 §8, RFC 6121 §5.2
-7. [x] CLI demo in `cmd/main`
+7. [x] CLI demo in `cmd/moon-xmpp` with an interactive REPL
 8. [x] Roster: get, set, push — RFC 6121 §2
 9. [x] Presence subscriptions — RFC 6121 §3
 

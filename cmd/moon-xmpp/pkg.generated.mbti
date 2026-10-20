@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "daqing/moon-xmpp/cmd/main"
+package "daqing/moon-xmpp/cmd/moon-xmpp"
 
 import {
   "daqing/moon-xmpp/core",
@@ -11,9 +11,15 @@ pub fn host_for(CliOptions) -> String raise CliError
 
 pub fn parse_args(Array[String]) -> CliOptions raise CliError
 
+pub fn parse_repl_command(String) -> ReplCommand
+
 pub fn program_args(Array[String]) -> Array[String]
 
 pub async fn receive_loop(@core.Connection, print~ : (String) -> Unit) -> Unit raise @core.XmppError
+
+pub fn repl_help() -> String
+
+pub async fn repl_loop(@core.Connection, read_line~ : async () -> String?, print~ : (String) -> Unit) -> Unit
 
 pub async fn run(CliOptions, host~ : String, port~ : Int32, verify? : Bool) -> @core.Connection raise @core.XmppError
 
@@ -42,10 +48,28 @@ pub struct CliOptions {
   roster : Bool
   subscribe : String?
   approve : String?
+  repl : Bool
 } derive(Eq, @debug.Debug)
 pub fn CliOptions::equal(Self, Self) -> Bool
 pub fn CliOptions::not_equal(Self, Self) -> Bool
 pub fn CliOptions::to_repr(Self) -> @debug.Repr
+
+pub(all) enum ReplCommand {
+  Empty
+  Help
+  Roster
+  Send(to~ : String, body~ : String)
+  Subscribe(jid~ : String)
+  Approve(jid~ : String)
+  Unsubscribe(jid~ : String)
+  Deny(jid~ : String)
+  Quit
+  Unknown(name~ : String)
+  MissingArgument(usage~ : String)
+} derive(Eq, @debug.Debug)
+pub fn ReplCommand::equal(Self, Self) -> Bool
+pub fn ReplCommand::not_equal(Self, Self) -> Bool
+pub fn ReplCommand::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

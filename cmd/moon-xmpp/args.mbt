@@ -24,6 +24,7 @@ pub struct CliOptions {
   roster : Bool
   subscribe : String?
   approve : String?
+  repl : Bool
 } derive(Eq, Debug)
 
 ///|
@@ -34,7 +35,7 @@ pub extend CliOptions with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 pub fn usage() -> String {
-  "usage: moon run cmd/main -- --jid user@example.com --password secret [--to peer@example.com --body \"hello\"] [--roster] [--subscribe peer@example.com] [--approve peer@example.com] [--host host] [--port 5222] [--resource name] [--ca-file pem]\n\nAt least one of --to/--body, --roster, --subscribe, or --approve is required."
+  "usage: moon run cmd/moon-xmpp -- --jid user@example.com --password secret [--to peer@example.com --body \"hello\"] [--roster] [--subscribe peer@example.com] [--approve peer@example.com] [--repl] [--host host] [--port 5222] [--resource name] [--ca-file pem]\n\nWith no action flags the client starts an interactive REPL after connecting. Pass --repl to start the REPL after the requested actions."
 }
 
 ///|
@@ -51,6 +52,7 @@ pub fn parse_args(args : Array[String]) -> CliOptions raise CliError {
   let mut roster = false
   let mut subscribe : String? = None
   let mut approve : String? = None
+  let mut repl = false
   let mut i = 0
   while i < args.length() {
     let arg = args[i]
@@ -90,6 +92,7 @@ pub fn parse_args(args : Array[String]) -> CliOptions raise CliError {
       "--roster" => roster = true
       "--subscribe" => subscribe = Some(take_value())
       "--approve" => approve = Some(take_value())
+      "--repl" => repl = true
       _ => raise CliError::UnknownArg(arg~)
     }
     i += 1
@@ -114,9 +117,6 @@ pub fn parse_args(args : Array[String]) -> CliOptions raise CliError {
     (None, false, None, Some(_)) => true
     _ => false
   }
-  if !has_action {
-    raise CliError::MissingArg(name="--to")
-  }
   {
     jid,
     password,
@@ -129,6 +129,7 @@ pub fn parse_args(args : Array[String]) -> CliOptions raise CliError {
     roster,
     subscribe,
     approve,
+    repl: repl || !has_action,
   }
 }
 

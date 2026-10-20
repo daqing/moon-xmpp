@@ -101,6 +101,7 @@ test "usage mentions every flag" {
   assert_true(u.contains("--roster"))
   assert_true(u.contains("--subscribe"))
   assert_true(u.contains("--approve"))
+  assert_true(u.contains("--repl"))
 }
 
 ///|
@@ -121,13 +122,21 @@ test "roster and subscription actions parse without a message" {
 }
 
 ///|
-test "an action-less or half-specified invocation raises" {
-  try parse_args(["--jid", "u@e.com", "--password", "p"]) catch {
-    CliError::MissingArg(name=nm) => assert_eq(nm, "--to")
-    _ => fail("wrong error")
-  } noraise {
-    _ => fail("expected error")
-  }
+test "an action-less invocation defaults to the repl" {
+  let opts = parse_args(["--jid", "u@e.com", "--password", "p"])
+  assert_eq(opts.repl, true)
+  let opts = parse_args(["--jid", "u@e.com", "--password", "p", "--repl"])
+  assert_eq(opts.repl, true)
+  let opts = parse_args(["--jid", "u@e.com", "--password", "p", "--roster"])
+  assert_eq(opts.repl, false)
+  let opts = parse_args([
+    "--jid", "u@e.com", "--password", "p", "--roster", "--repl",
+  ])
+  assert_eq(opts.repl, true)
+}
+
+///|
+test "a half-specified invocation raises" {
   try
     parse_args(["--jid", "u@e.com", "--password", "p", "--to", "t@e.com"])
   catch {

@@ -8,8 +8,41 @@ async fn main {
     None => 5222
   }
   let conn = run(opts, host~, port~)
-  receive_loop(conn, print=println) catch {
-    err => println("session ended: \{Repr(err)}")
+  if opts.repl {
+    repl_session(conn) catch {
+      err => println("session ended: \{Repr(err)}")
+    }
+  } else {
+    receive_loop(conn, print=println) catch {
+      err => println("session ended: \{Repr(err)}")
+    }
+  }
+}
+
+///|
+/// Run the REPL and the receive loop side by side. The roster is fetched
+/// before both start so that the REPL reads it from the cache instead of
+/// racing the receive loop for the socket.
+async fn repl_session(conn : @core.Connection) -> Unit {
+  defer conn.close()
+  ignore(
+    conn.get_roster() catch {
+      err => {
+        println("warning: could not load roster: \{Repr(err)}")
+        []
+      }
+    },
+  )
+  @async.any([
+    () => repl_loop(conn, read_line=read_stdin, print=println),
+    () => receive_loop(conn, print=println),
+  ])
+}
+
+///|
+async fn read_stdin() -> String? {
+  @stdio.stdin.read_until("\n") catch {
+    _ => None
   }
 }
 

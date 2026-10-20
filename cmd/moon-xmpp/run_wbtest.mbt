@@ -95,6 +95,7 @@ async test "run completes the full chain and delivers the chat message" {
       roster: false,
       subscribe: None,
       approve: None,
+      repl: false,
     }
     let conn = run(opts, host="127.0.0.1", port=46853, verify=false)
     assert_eq(conn.state(), Online)
