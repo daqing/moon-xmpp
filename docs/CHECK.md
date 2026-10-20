@@ -216,8 +216,8 @@ Conflict. The container name "/moon-xmpp-prosody" is already in use
 - §12 一致性清单中的 **4 个 Client SHOULD 全部缺失**；
 - **1 个 Client MAY（预批准）缺失**；
 - §2.1.6 的一条 **MUST（校验 roster push 的来源）未实现**；
-- §4／§5 还有若干细节缺口（presence 的 show／priority／更新、message 的
-  subject／thread／type）。
+- §4／§5 还有若干细节缺口（presence 的 priority、发送侧 show／status 与更新、
+  message 的 subject／thread／type）。
 
 项目本身也在 README 的「Non-goals」里明确排除了 roster 版本号（§2.6）与全部
 XEP 扩展，因此这里说的“全部能力”是指 RFC 6121 正文中与客户端相关的部分。
@@ -245,7 +245,7 @@ XEP 扩展，因此这里说的“全部能力”是指 RFC 6121 正文中与客
 | §4.5 | unavailable | ✅ | `signoff()` |
 | §4.6 | directed presence | ❌ | 无 API（主要影响 MUC 等扩展场景） |
 | §4.7.1 | type 语义 | ✅ | 无 type 视为 available，`unavailable` 正确区分 |
-| §4.7.2.1 | `<show/>` | ❌ | 不解析；`<show>away</show>` 会被显示成 available |
+| §4.7.2.1 | `<show/>` | ✅ | 已解析为 `show` 字段，`away`／`dnd` 等会显示成对应状态 |
 | §4.7.2.2 | `<status/>` | ✅ | 仅取最后一个，未处理 `xml:lang` 多语言 |
 | §4.7.2.3 | `<priority/>` | ❌ | 不解析 |
 | §5.1 | 一对一 chat | ✅ | 双向互操作验证过 |
@@ -292,8 +292,8 @@ RFC 6121 §12 把一致性要求拆成如下特性：
 
 1. **presence 表达力不足**：无法发送 `show`（away／chat／dnd／xa）、状态文本、
    priority，也无法在会话中进行 presence 更新。这是 IM 客户端最实际的缺口。
-2. **接收侧丢弃 presence 细节**：`show` 与 `priority` 未解析，导致“离开”被
-   当作“在线”展示。
+2. **presence 细节仍不完整**：接收侧已解析 `show`，但 `priority` 仍未解析，
+   发送侧也无法表达 show／status。
 3. **message 语义不完整**：不暴露 `type`，不解析 `subject`／`thread`，
    不区分 `error` 消息，发送 chat 时也不带 thread。
 4. **roster push 未校验来源**（安全相关的 MUST）。
@@ -346,7 +346,7 @@ bare JID 的 roster push。当前实现只检查 `type='set'` 和 `jabber:iq:ros
 
 | 优先级 | 内容 | 理由 |
 | --- | --- | --- |
-| P0 | presence 的 `show`／`status`／`priority` 发送与解析，以及“后续 presence 广播”API | 不做就无法表达离开／勿扰／自定义状态 |
+| P0 | presence 的 `show`／`status`／`priority` 发送、`priority` 解析，以及“后续 presence 广播”API | 不做就无法表达离开／勿扰／自定义状态 |
 | P0 | 修复 §4.1、§4.2 两个缺陷 | 改动小，前者影响正确性，后者影响安全 |
 | P1 | 接收侧暴露 message `type`，解析 `subject`／`thread`，区分 `error` | 对齐 §12 的 SHOULD |
 | P1 | 订阅 stanza 带 `id` | 便于请求／批准配对 |

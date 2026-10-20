@@ -33,6 +33,7 @@ async fn repl_session(conn : @core.Connection) -> Unit {
       }
     },
   )
+  let presence = PresenceTable::new()
   @async.any([
     () => {
       repl_loop(
@@ -40,9 +41,12 @@ async fn repl_session(conn : @core.Connection) -> Unit {
         read_line=read_stdin,
         print_line=println,
         prompt=write_prompt,
+        presence~,
       )
     },
-    () => receive_loop(conn, print=println),
+    () => {
+      receive_loop(conn, print=println, on_presence=fn(p) { presence.apply(p) })
+    },
   ])
 }
 

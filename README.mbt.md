@@ -114,7 +114,7 @@ The REPL accepts these commands:
 
 | Command | Effect |
 | --- | --- |
-| `roster` | print the cached roster |
+| `roster` | print the cached roster with availability |
 | `send <jid> <message>` | send a chat message |
 | `subscribe <jid>` | ask to see a contact's presence |
 | `approve <jid>` | accept a subscription request |

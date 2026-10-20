@@ -122,7 +122,7 @@ async fn FakeTls::read_until(self : FakeTls, marker~ : String) -> String {
 /// records the stanzas the REPL sends.
 #warnings("-alert_internal")
 async test "repl loop dispatches commands onto the connection" {
-  let addr = @socket.Addr::parse("127.0.0.1:46860") catch {
+  let addr = @socket.Addr::parse("127.0.0.1:46890") catch {
     _ => fail("invalid test addr")
   }
   let server = @socket.TcpServer::TcpServer(addr, reuse_addr=true)
@@ -175,7 +175,7 @@ async test "repl loop dispatches commands onto the connection" {
       to: None,
       body: None,
       host: Some("127.0.0.1"),
-      port: Some(46860),
+      port: Some(46890),
       resource: None,
       ca_file: None,
       roster: false,
@@ -183,7 +183,7 @@ async test "repl loop dispatches commands onto the connection" {
       approve: None,
       repl: true,
     }
-    let conn = run(opts, host="127.0.0.1", port=46860, verify=false)
+    let conn = run(opts, host="127.0.0.1", port=46890, verify=false)
     let items = conn.get_roster()
     assert_eq(items.length(), 1)
     let input = [
@@ -204,18 +204,28 @@ async test "repl loop dispatches commands onto the connection" {
     let output : Array[String] = []
     let prompts : Array[Unit] = []
     let prompt = fn() { prompts.push(()) }
+    let presence = PresenceTable::new()
+    presence.apply({
+      from: Some(@jid.Jid::parse("bob@example.com/phone")),
+      presence_type: None,
+      show: None,
+      status: None,
+    })
     repl_loop(
       conn,
       read_line~,
       print_line=fn(line) { output.push(line) },
       prompt~,
+      presence~,
     )
     assert_eq(prompts.length(), input.length())
     let text = output.join("\n")
     assert_true(text.contains("commands:"))
     assert_true(text.contains("roster: 1 item(s)"))
     assert_true(
-      text.contains("* bob@example.com name=\"Bob\" subscription=SubBoth"),
+      text.contains(
+        "* bob@example.com name=\"Bob\" subscription=SubBoth groups=[Friends] status=online",
+      ),
     )
     assert_true(text.contains("sent to bob@example.com"))
     assert_true(text.contains("* subscription request sent to bob@example.com"))

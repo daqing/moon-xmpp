@@ -70,11 +70,15 @@ exits; individual command failures are printed and the REPL stays open.
 ```
 > roster
 roster: 1 item(s)
-* bob@example.com name="Bob" subscription=SubBoth groups=[Friends]
+* bob@example.com name="Bob" subscription=SubBoth groups=[Friends] status=online
 ```
 
 Each line shows the contact's bare JID, the optional name, the subscription
-state, and the groups. Subscription values are `SubNone`, `SubTo` (you see
+state, the groups, and the current availability. `status=online` means at
+least one of the contact's resources has announced presence; otherwise the
+line says `status=offline`.
+
+Subscription values are `SubNone`, `SubTo` (you see
 their presence), `SubFrom` (they see yours), `SubBoth`, or `SubRemove`.
 
 The roster is fetched once at login and served from the local cache. The
@@ -84,6 +88,12 @@ them, so `roster` stays current without another round trip:
 ```
 * roster: bob@example.com SubBoth
 ```
+
+Availability is tracked in a separate presence table: every presence
+broadcast updates it, including `unavailable` when a contact — or one of its
+resources — goes offline. `roster` renders that table, so running it again
+after a broadcast shows the new status, and each broadcast is also printed as
+it arrives.
 
 ## 3. Add a friend
 
@@ -133,6 +143,12 @@ such as:
 * bob@example.com/phone is available
 ```
 
+When the contact sets a detailed status, its `<show/>` value replaces
+`available`: an Away contact prints `is away`, Do not disturb prints
+`is dnd`, and so on (`chat` and `xa` are the other values). A `<status/>`
+text is appended after a colon, for example
+`* bob@example.com/phone is dnd: Busy`.
+
 To stop seeing a contact's presence, use:
 
 ```
@@ -165,7 +181,7 @@ requests are surfaced; other stanzas are ignored.
 
 | Command | Effect |
 | --- | --- |
-| `roster` | Print the cached roster |
+| `roster` | Print the cached roster with availability |
 | `send <jid> <message>` | Send a chat message |
 | `subscribe <jid>` | Ask to see a contact's presence |
 | `approve <jid>` | Accept a subscription request |

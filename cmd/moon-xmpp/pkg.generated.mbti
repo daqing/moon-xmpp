@@ -4,6 +4,7 @@ package "daqing/moon-xmpp/cmd/moon-xmpp"
 import {
   "daqing/moon-xmpp/core",
   "moonbitlang/core/debug",
+  "moonbitlang/core/set",
 }
 
 // Values
@@ -15,11 +16,11 @@ pub fn parse_repl_command(String) -> ReplCommand
 
 pub fn program_args(Array[String]) -> Array[String]
 
-pub async fn receive_loop(@core.Connection, print~ : (String) -> Unit) -> Unit raise @core.XmppError
+pub async fn receive_loop(@core.Connection, print~ : (String) -> Unit, on_presence? : (@core.Presence) -> Unit) -> Unit raise @core.XmppError
 
 pub fn repl_help() -> String
 
-pub async fn repl_loop(@core.Connection, read_line~ : async () -> String?, print_line~ : (String) -> Unit, prompt~ : () -> Unit) -> Unit
+pub async fn repl_loop(@core.Connection, read_line~ : async () -> String?, print_line~ : (String) -> Unit, prompt~ : () -> Unit, presence? : PresenceTable) -> Unit
 
 pub async fn run(CliOptions, host~ : String, port~ : Int32, verify? : Bool) -> @core.Connection raise @core.XmppError
 
@@ -53,6 +54,14 @@ pub struct CliOptions {
 pub fn CliOptions::equal(Self, Self) -> Bool
 pub fn CliOptions::not_equal(Self, Self) -> Bool
 pub fn CliOptions::to_repr(Self) -> @debug.Repr
+
+pub(all) struct PresenceTable {
+  mut online : Map[String, @set.Set[String]]
+}
+pub fn PresenceTable::apply(Self, @core.Presence) -> Unit
+pub fn PresenceTable::is_online(Self, String) -> Bool
+pub fn PresenceTable::new() -> Self
+pub fn PresenceTable::resources(Self, String) -> Array[String]
 
 pub(all) enum ReplCommand {
   Empty

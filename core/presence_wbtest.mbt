@@ -73,7 +73,7 @@ async test "recv_presence parses broadcasts and skips other stanzas" {
     port=46843,
     server=tcp => {
       tcp.write(
-        "<iq type='result' id='x'/><presence from='alice@example.com/home'/><presence from='bob@example.com' type='unavailable'><status>gone fishing</status></presence>",
+        "<iq type='result' id='x'/><presence from='alice@example.com/home'/><presence from='bob@example.com' type='unavailable'><status>gone fishing</status></presence><presence from='carol@example.com/phone'><show>dnd</show><status>Busy</status></presence>",
       )
       let mut buf = ""
       for ;; {
@@ -96,10 +96,19 @@ async test "recv_presence parses broadcasts and skips other stanzas" {
       assert_eq(f1.to_string(), "alice@example.com/home")
       let p2 = conn.recv_presence()
       assert_eq(p2.presence_type, Some("unavailable"))
+      assert_eq(p2.show, None)
       assert_eq(p2.status, Some("gone fishing"))
       assert_eq(
         p2.from.map(fn(j) { j.bare().to_string() }),
         Some("bob@example.com"),
+      )
+      let p3 = conn.recv_presence()
+      assert_eq(p3.presence_type, None)
+      assert_eq(p3.show, Some("dnd"))
+      assert_eq(p3.status, Some("Busy"))
+      assert_eq(
+        p3.from.map(fn(j) { j.bare().to_string() }),
+        Some("carol@example.com"),
       )
     },
   )

@@ -1,15 +1,21 @@
 ///|
 /// Receive stanzas until the connection closes, printing each chat message
-/// and presence broadcast through `print`. Connection closure propagates
-/// as XmppError.
+/// and presence broadcast through `print`. `on_presence` sees every
+/// availability broadcast before it is printed, so callers can keep state
+/// such as a presence table up to date. Connection closure propagates as
+/// XmppError.
 pub async fn receive_loop(
   conn : @core.Connection,
   print~ : (String) -> Unit,
+  on_presence~ : (@core.Presence) -> Unit = fn(_) { () },
 ) -> Unit raise @core.XmppError {
   for ;; {
     match conn.recv_stanza() {
       Chat(msg) => print(format_chat(msg))
-      Presence(p) => print(format_presence(p))
+      Presence(p) => {
+        on_presence(p)
+        print(format_presence(p))
+      }
       RosterPush(item) => print(format_roster_push(item))
       Subscription(req) => print(format_subscription(req))
       Other => ()
@@ -34,7 +40,11 @@ fn format_presence(p : @core.Presence) -> String {
   }
   let what = match p.presence_type {
     Some(t) => t
-    None => "available"
+    None =>
+      match p.show {
+        Some(show) if !show.is_empty() => show
+        _ => "available"
+      }
   }
   match p.status {
     Some(s) => "* \{from} is \{what}: \{s}"

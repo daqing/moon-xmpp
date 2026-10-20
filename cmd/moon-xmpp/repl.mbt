@@ -94,7 +94,19 @@ pub fn parse_repl_command(line : String) -> ReplCommand {
 
 ///|
 pub fn repl_help() -> String {
-  "commands:\n  roster               list the cached roster\n  send <jid> <message> send a chat message\n  subscribe <jid>      request a contact's presence\n  approve <jid>        accept a subscription request\n  unsubscribe <jid>    stop receiving a contact's presence\n  deny <jid>           refuse a subscription request\n  help                 show this help\n  quit                 leave the repl"
+  "commands:\n  roster               list the cached roster with status\n  send <jid> <message> send a chat message\n  subscribe <jid>      request a contact's presence\n  approve <jid>        accept a subscription request\n  unsubscribe <jid>    stop receiving a contact's presence\n  deny <jid>           refuse a subscription request\n  help                 show this help\n  quit                 leave the repl"
+}
+
+///|
+/// Render a roster entry with its current availability as tracked in
+/// `presence`.
+fn format_roster_status(
+  item : @core.RosterItem,
+  presence : PresenceTable,
+) -> String {
+  let bare = item.jid.bare().to_string()
+  let status = if presence.is_online(bare) { "online" } else { "offline" }
+  "\{format_roster_item(item)} status=\{status}"
 }
 
 ///|
@@ -102,13 +114,14 @@ async fn execute_repl_command(
   conn : @core.Connection,
   cmd : ReplCommand,
   print_line~ : (String) -> Unit,
+  presence~ : PresenceTable,
 ) -> Unit raise @core.XmppError {
   match cmd {
     Roster => {
       let items = conn.roster()
       print_line("roster: \{items.length()} item(s)")
       for item in items {
-        print_line(format_roster_item(item))
+        print_line(format_roster_status(item, presence))
       }
     }
     Send(to~, body~) => {
@@ -144,12 +157,14 @@ async fn execute_repl_command(
 ///
 /// The roster is served from the connection's cache so that only the
 /// background receive loop reads from the socket; callers should fetch the
-/// roster before starting both loops.
+/// roster before starting both loops. `presence` is the shared availability
+/// table the receive loop updates.
 pub async fn repl_loop(
   conn : @core.Connection,
   read_line~ : async () -> String?,
   print_line~ : (String) -> Unit,
   prompt~ : () -> Unit,
+  presence~ : PresenceTable = PresenceTable::new(),
 ) -> Unit {
   print_line("moon-xmpp repl. Type 'help' for commands, 'quit' to exit.")
   for ;; {
@@ -166,7 +181,7 @@ pub async fn repl_loop(
         print_line("unknown command: \{name} (type 'help' for help)")
       MissingArgument(usage~) => print_line("usage: \{usage}")
       cmd =>
-        execute_repl_command(conn, cmd, print_line~) catch {
+        execute_repl_command(conn, cmd, print_line~, presence~) catch {
           err => print_line("error: \{Repr(err)}")
         }
     }

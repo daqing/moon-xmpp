@@ -64,12 +64,15 @@ moon run cmd/moon-xmpp -- --jid alice@localhost --password secret123 \
 ```
 > roster
 roster: 1 item(s)
-* bob@example.com name="Bob" subscription=SubBoth groups=[Friends]
+* bob@example.com name="Bob" subscription=SubBoth groups=[Friends] status=online
 ```
 
-每行依次是联系人的裸 JID、可选的名字、订阅状态和分组。订阅状态取值为
-`SubNone`、`SubTo`（你能看到对方 presence）、`SubFrom`（对方能看到你的）、
-`SubBoth` 或 `SubRemove`。
+每行依次是联系人的裸 JID、可选的名字、订阅状态、分组和当前可用性。
+`status=online` 表示对方至少有一个资源已广播 presence；否则显示
+`status=offline`。
+
+订阅状态取值为 `SubNone`、`SubTo`（你能看到对方 presence）、`SubFrom`
+（对方能看到你的）、`SubBoth` 或 `SubRemove`。
 
 roster 在登录时拉取一次，之后由本地缓存提供。服务器推送的 roster 变更会被
 立即应用并打印，所以 `roster` 不需要再发起一次请求也能保持最新：
@@ -77,6 +80,11 @@ roster 在登录时拉取一次，之后由本地缓存提供。服务器推送�
 ```
 * roster: bob@example.com SubBoth
 ```
+
+在线状态由一张独立的 presence 状态表维护：每条 presence 广播都会更新它，
+包括联系人（或它的某个资源）下线时的 `unavailable`。`roster` 直接渲染这张
+表，所以广播之后再执行一次 `roster` 就能看到最新状态；每条广播也会实时
+打印出来。
 
 ## 3. 添加好友
 
@@ -124,6 +132,10 @@ Bob 需要发送 `subscribe alice@example.com`，再由 Alice 执行
 * bob@example.com/phone is available
 ```
 
+如果对方设置了详细状态，`<show/>` 的值会替代 `available`：离开显示
+`is away`，请勿打扰显示 `is dnd`，另外还有 `chat` 和 `xa`。`<status/>`
+的文本会以冒号追加在后面，例如 `* bob@example.com/phone is dnd: Busy`。
+
 如果不想再接收某个联系人的 presence：
 
 ```
@@ -155,7 +167,7 @@ message msg_2 sent to bob@example.com
 
 | 命令 | 作用 |
 | --- | --- |
-| `roster` | 打印缓存的 roster |
+| `roster` | 打印缓存的 roster 及在线状态 |
 | `send <jid> <message>` | 发送聊天消息 |
 | `subscribe <jid>` | 请求查看某个联系人的 presence |
 | `approve <jid>` | 同意对方的订阅请求 |

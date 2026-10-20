@@ -87,7 +87,7 @@ REPL 支持以下命令：
 
 | 命令 | 作用 |
 | --- | --- |
-| `roster` | 打印缓存的 roster |
+| `roster` | 打印缓存的 roster 及在线状态 |
 | `send <jid> <message>` | 发送聊天消息 |
 | `subscribe <jid>` | 请求查看某个联系人的 presence |
 | `approve <jid>` | 同意对方的订阅请求 |

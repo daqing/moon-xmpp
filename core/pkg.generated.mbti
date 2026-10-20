@@ -187,6 +187,7 @@ pub fn IncomingStanza::to_repr(Self) -> @debug.Repr
 pub(all) struct Presence {
   from : @jid.Jid?
   presence_type : String?
+  show : String?
   status : String?
 } derive(Eq, @debug.Debug)
 pub fn Presence::equal(Self, Self) -> Bool
