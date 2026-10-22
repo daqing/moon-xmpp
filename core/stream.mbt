@@ -14,7 +14,7 @@ pub extend StreamHeader with @moonbitlang/core/debug.Debug::{to_repr}
 ///|
 priv enum Incoming {
   Header(String)
-  Element(@XMLParser.XMLElement)
+  Element(@xml.XMLElement)
 }
 
 ///|

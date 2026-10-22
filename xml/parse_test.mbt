@@ -5,9 +5,9 @@ test "parse stanza element" {
   )
   assert_eq(el.name, "message")
   assert_eq(el.get_attribute("type"), Some("chat"))
-  let mut body : @XMLParser.XMLElement? = None
+  let mut body : @xml.XMLElement? = None
   for child in el.get_children() {
-    guard child is @XMLParser.XMLChildren::Element(e) else { continue }
+    guard child is @xml.XMLChildren::Element(e) else { continue }
     if e.name is "body" {
       body = Some(e)
       break

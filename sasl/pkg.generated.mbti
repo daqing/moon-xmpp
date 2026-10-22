@@ -12,7 +12,7 @@ pub fn hash_bytes(alg~ : ScramAlg, Bytes) -> FixedArray[Byte]
 
 pub fn hmac_bytes(alg~ : ScramAlg, key~ : Bytes, message~ : Bytes) -> FixedArray[Byte]
 
-pub fn pbkdf2(alg~ : ScramAlg, password~ : Bytes, salt~ : Bytes, iterations~ : Int) -> FixedArray[Byte]
+pub fn pbkdf2(alg~ : ScramAlg, password~ : Bytes, salt~ : Bytes, iterations~ : Int32) -> FixedArray[Byte]
 
 pub fn plain(authcid~ : String, password~ : String, authzid? : String) -> String raise SaslError
 

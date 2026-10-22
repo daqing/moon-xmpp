@@ -35,14 +35,12 @@ pub extend StreamErrorCondition with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 /// Parse a `<stream:error/>` element into its condition and optional text.
-fn parse_stream_error(
-  el : @XMLParser.XMLElement,
-) -> (StreamErrorCondition, String?) {
+fn parse_stream_error(el : @xml.XMLElement) -> (StreamErrorCondition, String?) {
   let mut condition : StreamErrorCondition = UndefinedCondition
   let mut text : String? = None
   let mut seen = false
   for child in el.get_children() {
-    guard child is @XMLParser.XMLChildren::Element(item) else { continue }
+    guard child is @xml.XMLChildren::Element(item) else { continue }
     if item.name is "text" {
       text = Some(item.get_text())
     } else if !seen {
@@ -54,7 +52,7 @@ fn parse_stream_error(
 }
 
 ///|
-fn stream_error_condition(el : @XMLParser.XMLElement) -> StreamErrorCondition {
+fn stream_error_condition(el : @xml.XMLElement) -> StreamErrorCondition {
   match el.name {
     "bad-format" => BadFormat
     "bad-namespace-prefix" => BadNamespacePrefix

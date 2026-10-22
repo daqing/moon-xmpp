@@ -1,0 +1,7 @@
+* bob@localhost/KiPV0eyVpx5Z is available
+* subscription Subscribe from alice@localhost
+* alice@localhost is unavailable
+* alice@localhost/XW_B1UDTuofO is available
+* alice@localhost/XW_B1UDTuofO is available
+* alice@localhost/XW_B1UDTuofO is available
+* alice@localhost/XW_B1UDTuofO is available

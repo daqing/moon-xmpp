@@ -2,13 +2,11 @@ import {
   "daqing/moon-xmpp/jid",
   "daqing/moon-xmpp/sasl",
   "daqing/moon-xmpp/xml",
-  "moonbit-community/XMLParser",
   "moonbitlang/async/socket",
   "moonbitlang/async/tls",
   "moonbitlang/core/debug",
   "moonbitlang/core/encoding/base64",
   "moonbitlang/core/encoding/utf8",
-  "moonbitlang/core/string",
 }
 
 import {

@@ -5,7 +5,7 @@
 > - 编号规则：`T<阶段>.<序号>`，阶段内顺序即建议实施顺序。
 > - 进度规则：每完成一项就勾选；完成协议能力相关的任务后，同步更新 README（中英两份）的协议覆盖表状态与 Roadmap 复选框。
 > - 依赖关系：T1 → T2 → … → T8 依次依赖；**T9.1（本地 ejabberd 环境）建议提前到 T2 开始前完成**，因为从流协商起就需要真实服务器联调。JID、XML、SCRAM 等纯计算任务不依赖服务器，可随时穿插进行。
-> - 截至 2026-10-01：T1 至 T9 全部完成（T9.4 经 slixmpp 互操作 + Adium 手动 GUI 实测双重验证）。
+> - 截至 2026-10-16：T1 至 T10 全部完成（T9.4 经 slixmpp 互操作 + Adium 手动 GUI 实测双重验证；T10.5 经 scripts/roster.sh 验证）。
 
 ## T1 设计与基础
 
@@ -15,7 +15,7 @@
 - [x] T1.2 包结构已创建：jid / xml / sasl / core，各自拥有一个公开 suberror 错误类型（JidError、XmlError、SaslError、XmppError）；根包保持 facade 角色，后续用 `pub using` 再导出
 - [x] T1.3 JID 解析：`localpart@domainpart/resourcepart` 拆分与合法性校验（RFC 8264）——jid 包的 `Jid::parse`，含禁用字符与每段 1023 字节上限校验
 - [x] T1.4 JID 规范化：width map、case map 与 NFKC（RFC 8264）——case map 与 NFKC 来自 moonbit-community/unicode@0.5.2（已锁版本），width map 自实现；resourcepart 只做 width map、保留大小写
-- [x] T1.5 XML 层完成：`Framer` 把字节流切成 Root / Stanza / StreamEnd 帧（标签栈匹配，感知引号/注释/CDATA，StreamEnd 后可复用以支持流重启）；`parse_element` 把完整 stanza 交给 XMLParser@0.2.6 解析；序列化用 `escape_text` / `escape_attr`。注意：解析器会在子元素前后产出空文本节点，遍历 children 要按名字找而不是按下标
+- [x] T1.5 XML 层完成：`Framer` 把字节流切成 Root / Stanza / StreamEnd 帧（标签栈匹配，感知引号/注释/CDATA，StreamEnd 后可复用以支持流重启）；`parse_element` 把完整 stanza 交给 Milky2018/xml@0.6.0（pull 解析器）解析；序列化用 `escape_text` / `escape_attr`。遍历 children 要按名字找而不是按下标
 
 ## T2 XML 流（RFC 6120 §4）
 
@@ -85,6 +85,16 @@
 - [x] T9.3 集成测试：scripts/e2e.sh 对真实本地服务器验证双向——在线送达（alice→bob）与离线暂存后送达（bob→alice），并暴露、修复了两个真实 SASL bug（载荷 base64、SCRAM 用户名）
 - [x] T9.4 端到端验收：与第三方客户端的双向消息交换已验证两次——slixmpp 自动化互操作（独立实现，transcript 存于 docs/acceptance/）+ 作者用 Adium 手动 GUI 实测（2026-10-02，按作者决定免截图）
 - [x] T9.5 收尾：README 已更新（协议表、Roadmap、状态、演示）；演示材料为 CLI + scripts/e2e.sh + docs/ACCEPTANCE.md
+
+## T10 roster 与 presence 订阅（RFC 6121 §2、§3）
+
+目标：补齐 IM 场景的另一半——通讯录与授权可见的 presence，本届组委会要求实现。
+
+- [x] T10.1 roster 拉取：`get_roster` 发出 `jabber:iq:roster` get，解析 item（jid、name、subscription、ask、group）并对未知属性/子元素保持宽容，结果写入缓存；`Connection::roster()` 暴露缓存
+- [x] T10.2 roster 修改：`set_roster_item` / `remove_roster_item` 发送 `type='set'`，name 与 group 均做转义，随后更新缓存
+- [x] T10.3 roster push：服务器主动发来的 `type='set'` roster iq 先回 `result` 应答、再应用到缓存，最后以 `RosterPush` 事件上报（RFC 6121 §2.1.6）；等待 iq 应答期间到达的其他 stanza 会入队而非丢弃
+- [x] T10.4 presence 订阅：四种 stanza（`subscribe` / `subscribed` / `unsubscribe` / `unsubscribed`）由 `send_subscribe` 系列发出；收到的订阅请求以 `Subscription` 事件上报，库绝不自动回复（RFC 6121 §3.1.3）
+- [x] T10.5 CLI 与验收：`--roster` / `--subscribe` / `--approve`；scripts/roster.sh 对 prosody + slixmpp 验证 roster 拉取、订阅授权与双向 presence 广播（transcript 存于 docs/acceptance/）
 
 ---
 

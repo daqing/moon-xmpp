@@ -2,7 +2,6 @@
 package "daqing/moon-xmpp/xml"
 
 import {
-  "moonbit-community/XMLParser",
   "moonbitlang/core/debug",
 }
 
@@ -11,7 +10,7 @@ pub fn escape_attr(String) -> String
 
 pub fn escape_text(String) -> String
 
-pub fn parse_element(String) -> @XMLParser.XMLElement raise XmlError
+pub fn parse_element(String) -> XMLElement raise XmlError
 
 // Errors
 pub(all) suberror XmlError {
@@ -38,6 +37,25 @@ pub struct Framer {
 pub fn Framer::new() -> Self
 pub fn Framer::push(Self, String) -> Array[Frame] raise XmlError
 pub fn Framer::reset(Self) -> Unit
+
+pub(all) enum XMLChildren {
+  Element(XMLElement)
+  CDATA(String)
+  PI(String)
+  Comment(String)
+  Text(String)
+  WhiteSpace(String)
+}
+
+pub(all) struct XMLElement {
+  name : String
+  empty_element : Bool
+  attributes : Map[String, String]
+  children : Array[XMLChildren]
+}
+pub fn XMLElement::get_attribute(Self, String) -> String?
+pub fn XMLElement::get_children(Self) -> Array[XMLChildren]
+pub fn XMLElement::get_text(Self) -> String
 
 // Type aliases
 

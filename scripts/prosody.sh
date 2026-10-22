@@ -28,14 +28,20 @@ case "${1:-}" in
       moon-xmpp-prosody
     echo "waiting for the client port..."
     for _ in $(seq 1 60); do
-      if nc -z 127.0.0.1 5222 2>/dev/null; then
-        echo "prosody is up on 127.0.0.1:5222 (STARTTLS required, host: localhost)"
-        exit 0
-      fi
       if ! docker ps --format '{{.Names}}' | grep -q "^$NAME$"; then
         echo "container exited unexpectedly; last logs:"
         docker logs "$NAME" 2>&1 | tail -20 || true
         exit 1
+      fi
+      # The port forward alone proves nothing: docker-proxy accepts the
+      # connection even when prosody itself has already shut down (for
+      # instance when mod_posix refuses to run as root), which shows up as a
+      # reset connection in the client. Ask prosodyctl as well.
+      if docker exec "$NAME" prosodyctl \
+           --config /etc/prosody/prosody.cfg.lua status >/dev/null 2>&1 \
+         && nc -z 127.0.0.1 5222 2>/dev/null; then
+        echo "prosody is up on 127.0.0.1:5222 (STARTTLS required, host: localhost)"
+        exit 0
       fi
       sleep 1
     done

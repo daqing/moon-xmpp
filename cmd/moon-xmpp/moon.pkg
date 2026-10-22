@@ -2,6 +2,7 @@ import {
   "daqing/moon-xmpp/core",
   "daqing/moon-xmpp/jid",
   "moonbitlang/async",
+  "moonbitlang/async/stdio",
   "moonbitlang/core/debug",
   "moonbitlang/core/env",
   "moonbitlang/core/string",
@@ -15,3 +16,7 @@ import {
 } for "wbtest"
 
 pkgtype(kind: "executable")
+
+options(
+  "native-stub": [ "prompt.c" ],
+)

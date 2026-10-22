@@ -42,7 +42,7 @@ pub extend SaslFailureCondition with @moonbitlang/core/debug.Debug::{to_repr}
 pub fn select_mechanism(
   features~ : Features,
   encrypted~ : Bool,
-  channel_binding? : Bool = false,
+  channel_binding~ : Bool = false,
 ) -> String? {
   let preferred = if channel_binding {
     ["SCRAM-SHA-256-PLUS", "SCRAM-SHA-1-PLUS", "SCRAM-SHA-256", "SCRAM-SHA-1"]
@@ -65,7 +65,7 @@ pub fn select_mechanism(
 }
 
 ///|
-fn index_of(arr : Array[String], s : String) -> Int {
+fn index_of(arr : Array[String], s : String) -> Int32 {
   let mut i = 0
   for item in arr {
     if item == s {
@@ -220,14 +220,12 @@ pub async fn Connection::read_raw_element(
 }
 
 ///|
-fn parse_sasl_failure(
-  el : @XMLParser.XMLElement,
-) -> (SaslFailureCondition, String?) {
+fn parse_sasl_failure(el : @xml.XMLElement) -> (SaslFailureCondition, String?) {
   let mut condition : SaslFailureCondition = Unknown("missing-condition")
   let mut text : String? = None
   let mut seen = false
   for child in el.get_children() {
-    guard child is @XMLParser.XMLChildren::Element(item) else { continue }
+    guard child is @xml.XMLChildren::Element(item) else { continue }
     if item.name is "text" {
       text = Some(item.get_text())
     } else if !seen {
@@ -239,7 +237,7 @@ fn parse_sasl_failure(
 }
 
 ///|
-fn sasl_failure_condition(el : @XMLParser.XMLElement) -> SaslFailureCondition {
+fn sasl_failure_condition(el : @xml.XMLElement) -> SaslFailureCondition {
   match el.name {
     "aborted" => Aborted
     "account-disabled" => AccountDisabled

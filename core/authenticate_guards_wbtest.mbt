@@ -3,7 +3,7 @@
 /// placeholder server. The guards under test only inspect connection
 /// state, so the server never speaks.
 async fn with_fake_session(
-  port~ : Int,
+  port~ : Int32,
   flow~ : async (Connection) -> Unit,
 ) -> Unit {
   let addr = @socket.Addr::parse("127.0.0.1:\{port}") catch {

@@ -6,4 +6,11 @@ RUN apt-get update \
 
 EXPOSE 5222
 
+# mod_posix shuts the server down when it runs as root, so run as the
+# package-provided prosody user. Its own pid/config paths must be writable.
+RUN mkdir -p /var/run/prosody \
+  && chown prosody:prosody /var/run/prosody
+
+USER prosody
+
 CMD ["prosody"]

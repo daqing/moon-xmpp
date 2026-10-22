@@ -1,4 +1,4 @@
 ///|
 test "version" {
-  inspect(@xmpp.version(), content="0.1.0")
+  inspect(@xmpp.version(), content="0.11.0")
 }

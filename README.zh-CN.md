@@ -4,17 +4,18 @@ MoonBit 的 XMPP 客户端库，实现 XMPP Core（[RFC 6120](https://www.rfc-ed
 
 ## 项目状态
 
-**开发中。** moon-xmpp 是一个 MoonBit 黑客松参赛项目。核心会话生命周期（流、STARTTLS、SASL、绑定、presence、聊天）已实现，有 100+ 测试覆盖，并在真实本地 XMPP 服务器上完成集成验证（见 `scripts/e2e.sh`）；剩余步骤是与 GUI 客户端的互操作实测——见下文「路线图」与 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)。
+moon-xmpp 是一个 MoonBit 黑客松参赛项目。核心会话生命周期（流、STARTTLS、SASL、资源绑定、presence、roster 与订阅管理、聊天）已实现，有 130+ 测试覆盖，并已完成端到端验收：连接真实的本地 XMPP 服务器（prosody）后，moon-xmpp 发出的聊天消息实时到达 macOS 上的 Adium GUI 客户端，Adium 回复的消息也被 moon-xmpp 收到。此外还通过独立的 Python XMPP 实现 [slixmpp](https://codeberg.org/poezio/slixmpp) 做了自动化互操作验证，涵盖聊天、roster 拉取、订阅授权与 presence 广播。验收过程与记录见 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)。
 
 ## 它做什么
 
 moon-xmpp 让 MoonBit 程序能够连接 ejabberd 这类标准 XMPP 服务器，安全登录，并收发一对一聊天消息；消息可与 Psi、Gajim、Conversations 等现成客户端互通。
 
-本项目的验收场景：
+本项目的验收场景（已端到端验证通过，见「项目状态」）：
 
 1. moon-xmpp 连接一台 ejabberd 服务器，完成 STARTTLS 加密、SASL 认证与资源绑定。
 2. 向另一个账号发送聊天消息，消息在第三方客户端中实时到达。
 3. 从该客户端回复的消息，能够被 moon-xmpp 收到。
+4. 能够拉取 roster 并与该客户端完成 presence 订阅授权：对方发来的订阅请求会如实上报而不会被自动回复；双向授权建立后，presence 广播双向可达。
 
 ## 协议覆盖
 
@@ -25,12 +26,14 @@ moon-xmpp 让 MoonBit 程序能够连接 ejabberd 这类标准 XMPP 服务器，
 | SASL：PLAIN、SCRAM-SHA-1、SCRAM-SHA-256 | [RFC 4422](https://www.rfc-editor.org/rfc/rfc4422)、[RFC 4616](https://www.rfc-editor.org/rfc/rfc4616)、[RFC 5802](https://www.rfc-editor.org/rfc/rfc5802)、[RFC 7677](https://www.rfc-editor.org/rfc/rfc7677) | 已完成 |
 | 资源绑定 | [RFC 6120 §7](https://www.rfc-editor.org/rfc/rfc6120#section-7) | 已完成 |
 | 初始 presence | [RFC 6121 §4.2](https://www.rfc-editor.org/rfc/rfc6121#section-4.2) | 已完成 |
+| roster：拉取、修改、推送 | [RFC 6121 §2](https://www.rfc-editor.org/rfc/rfc6121#section-2) | 已完成 |
+| presence 订阅管理 | [RFC 6121 §3](https://www.rfc-editor.org/rfc/rfc6121#section-3) | 已完成 |
 | 聊天消息 | [RFC 6120 §8](https://www.rfc-editor.org/rfc/rfc6120#section-8)、[RFC 6121 §5.2](https://www.rfc-editor.org/rfc/rfc6121#section-5.2) | 已完成 |
 | JID 解析与规范化 | [RFC 8264](https://www.rfc-editor.org/rfc/rfc8264) | 已完成 |
 
 ## 范围之外
 
-- roster 与 presence 订阅管理（RFC 6121 §2–3）：暂不实现，核心链路打通后再评估。
+- roster 版本号（RFC 6121 §2.6）：roster 拉取一律请求全量列表。
 - 各类 XEP 扩展，如 SASL2（XEP-0388）、Stream Management（XEP-0198）、Message Carbons（XEP-0280）、MAM（XEP-0313）。
 - 服务器到服务器（s2s）互联及一切服务端功能——这是纯客户端库。
 
@@ -61,26 +64,50 @@ async fn main {
   ignore(conn.authenticate(jid="alice@example.com", password="secret"))
   ignore(conn.bind_resource(resource="laptop"))
   conn.send_initial_presence()
+  ignore(conn.get_roster())
+  ignore(conn.send_subscribe(to="bob@example.com"))
   let id = conn.send_chat(to="bob@example.com", body="Hello from MoonBit!")
-  let stanza = conn.recv_stanza() // Chat / Presence / Other
+  let stanza = conn.recv_stanza() // Chat / Presence / RosterPush / Subscription / Other
 }
 ```
 
 ## 演示
 
-`cmd/main` 下有一个小型命令行客户端：
+`cmd/moon-xmpp` 下有一个小型命令行客户端。只给凭据时，它会连接服务器并自动进入交互式 REPL：
 
 ```bash
 git clone https://github.com/daqing/moon-xmpp
 cd moon-xmpp
-moon run cmd/main -- \
+moon run cmd/moon-xmpp -- \
   --jid alice@example.com \
-  --password '…' \
-  --to bob@example.com \
-  --body 'Hello from MoonBit!'
+  --password '…'
 ```
 
-它会建立连接（默认 STARTTLS，可用 `--host`/`--port` 覆盖）、登录、绑定资源、上线、发送消息，然后持续打印收到的消息与 presence 广播，直到流结束。用标准客户端（Psi、Gajim、Conversations）登录 `bob@example.com`，消息会立刻到达；从该客户端发送回复，正在运行的 CLI 也会打印出来。
+REPL 支持以下命令：
+
+| 命令 | 作用 |
+| --- | --- |
+| `roster` | 打印缓存的 roster 及在线状态 |
+| `send <jid> <message>` | 发送聊天消息 |
+| `subscribe <jid>` | 请求查看某个联系人的 presence |
+| `approve <jid>` | 同意对方的订阅请求 |
+| `unsubscribe <jid>` | 停止接收某个联系人的 presence |
+| `deny <jid>` | 拒绝对方的订阅请求 |
+| `help` | 列出所有命令 |
+| `quit` | 关闭会话（也可用 `exit`，或输入 EOF） |
+
+REPL 等待输入期间，收到的聊天消息和 presence 广播仍会实时打印出来。登录、联系人管理和发消息的完整示例见 [docs/REPL.zh-CN.md](docs/REPL.zh-CN.md)。
+
+一次性动作无需 REPL；加上 `--repl` 可以在动作执行完后进入 REPL：
+
+```bash
+moon run cmd/moon-xmpp -- --jid alice@example.com --password '…' \
+  --to bob@example.com --body 'Hello from MoonBit!'
+moon run cmd/moon-xmpp -- --jid alice@example.com --password '…' \
+  --roster --subscribe bob@example.com --approve bob@example.com --repl
+```
+
+客户端会建立连接（默认 STARTTLS，可用 `--host`/`--port` 覆盖）、登录、绑定资源并上线。`--roster` 打印拉取到的 roster，`--subscribe` 请求查看某个联系人的 presence，`--approve` 同意对方的订阅请求。收到的订阅请求只会被打印出来，绝不自动回复。不加 `--repl` 时，客户端会持续打印收到的 stanza，直到流结束。
 
 ## 路线图
 
@@ -90,7 +117,9 @@ moon run cmd/main -- \
 4. [x] 资源绑定 — RFC 6120 §7
 5. [x] 初始 presence — RFC 6121 §4.2
 6. [x] 聊天消息收发 — RFC 6120 §8、RFC 6121 §5.2
-7. [x] `cmd/main` 命令行演示
+7. [x] `cmd/moon-xmpp` 命令行演示，支持交互式 REPL
+8. [x] roster：拉取、修改、推送 — RFC 6121 §2
+9. [x] presence 订阅管理 — RFC 6121 §3
 
 ## 开发
 
@@ -110,6 +139,7 @@ scripts/prosody.sh start                    # x86 主机可用 scripts/ejabberd.
 scripts/prosody.sh register alice secret123
 scripts/prosody.sh register bob secret123
 scripts/e2e.sh                              # 双向送达测试
+scripts/roster.sh                           # roster 与订阅测试
 ```
 
 ## 许可证

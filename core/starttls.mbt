@@ -6,8 +6,8 @@
 pub async fn Connection::starttls(
   self : Connection,
   domain~ : String,
-  verify? : Bool = true,
-  ca_file? : String? = None,
+  verify~ : Bool = true,
+  ca_file~ : String? = None,
 ) -> Features raise XmppError {
   if self.state != Connecting {
     raise XmppError::ProtocolViolation(

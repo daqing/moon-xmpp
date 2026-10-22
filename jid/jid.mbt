@@ -123,7 +123,7 @@ fn validate_domainpart(s : String) -> Unit raise JidError {
     }
     let inner = s[1:s.length() - 1].to_owned()
     for c in inner {
-      if !(c is ('0'..='9' | 'a'..='f' | 'A'..='F' | ':' | '.')) {
+      if !(c is ('0'..<='9' | 'a'..<='f' | 'A'..<='F' | ':' | '.')) {
         raise JidError::InvalidChar(part="domainpart", char=c)
       }
     }
@@ -133,7 +133,7 @@ fn validate_domainpart(s : String) -> Unit raise JidError {
       if n < 0x20 || n == 0x7f {
         raise JidError::InvalidChar(part="domainpart", char=c)
       } else if n < 0x80 {
-        if !(c is ('0'..='9' | 'a'..='z' | 'A'..='Z' | '-' | '.')) {
+        if !(c is ('0'..<='9' | 'a'..<='z' | 'A'..<='Z' | '-' | '.')) {
           raise JidError::InvalidChar(part="domainpart", char=c)
         }
       }

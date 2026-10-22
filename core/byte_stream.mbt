@@ -48,7 +48,7 @@ pub fn ByteStream::reset(self : ByteStream) -> Unit {
 ///|
 /// Return the length in bytes of the longest prefix of complete UTF-8
 /// sequences. Trailing partial sequences are kept for the next chunk.
-fn complete_utf8_prefix(arr : Array[Byte]) -> Int raise @xml.XmlError {
+fn complete_utf8_prefix(arr : Array[Byte]) -> Int32 raise @xml.XmlError {
   let len = arr.length()
   let mut i = 0
   while i < len {

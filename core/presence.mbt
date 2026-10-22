@@ -17,10 +17,12 @@ pub async fn Connection::send_initial_presence(
 ///|
 /// A received contact presence broadcast (RFC 6121 §4.4). `presence_type`
 /// is None for available and carries e.g. "unavailable" or "error"
-/// otherwise.
+/// otherwise. `show` is the availability detail of an available presence:
+/// "away", "chat", "dnd", or "xa" (RFC 6121 §4.7.2.1).
 pub(all) struct Presence {
   from : @jid.Jid?
   presence_type : String?
+  show : String?
   status : String?
 } derive(Eq, Debug)
 
@@ -46,7 +48,7 @@ pub async fn Connection::recv_presence(
 }
 
 ///|
-fn parse_presence(el : @XMLParser.XMLElement) -> Presence raise XmppError {
+fn parse_presence(el : @xml.XMLElement) -> Presence raise XmppError {
   let from : @jid.Jid? = match el.get_attribute("from") {
     Some(f) =>
       Some(
@@ -59,14 +61,18 @@ fn parse_presence(el : @XMLParser.XMLElement) -> Presence raise XmppError {
       )
     None => None
   }
+  let mut show : String? = None
   let mut status : String? = None
   for child in el.get_children() {
-    guard child is @XMLParser.XMLChildren::Element(e) else { continue }
+    guard child is @xml.XMLChildren::Element(e) else { continue }
     if e.name == "status" {
       status = Some(element_text(e))
     }
+    if e.name == "show" {
+      show = Some(element_text(e).trim().to_owned())
+    }
   }
-  { from, presence_type: el.get_attribute("type"), status, }
+  { from, presence_type: el.get_attribute("type"), show, status, }
 }
 
 ///|

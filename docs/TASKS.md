@@ -13,7 +13,7 @@
 >   negotiation and everything after it needs a real server to test against.
 >   Pure computation tasks (JID, XML, SCRAM) don't need a server and can be
 >   interleaved at any time.
-> - As of 2026-10-01: T1 through T9 all completed (T9.4 verified via slixmpp interop and a manual Adium GUI run).
+> - As of 2026-10-16: T1 through T10 all completed (T9.4 verified via slixmpp interop and a manual Adium GUI run; T10.5 via scripts/roster.sh).
 
 ## T1 Design and Foundations
 
@@ -38,9 +38,9 @@ Goal: settle the programming model and lay the JID and XML groundwork.
 - [x] T1.5 XML layer done: `Framer` splits the stream into Root / Stanza /
       StreamEnd frames (tag-stack matching, quote/comment/CDATA aware,
       reusable after StreamEnd for stream restarts); `parse_element` feeds
-      complete stanzas to XMLParser@0.2.6; serialization uses `escape_text`
-      / `escape_attr`. The parser emits empty text nodes around child
-      elements, so walk children by name rather than by index
+      complete stanzas to Milky2018/xml@0.6.0 (a pull parser); serialization
+      uses `escape_text` / `escape_attr`. Walk children by name rather than
+      by index
 
 ## T2 XML Streams (RFC 6120 §4)
 
@@ -209,6 +209,30 @@ Goal: pass the acceptance scenario and wrap up.
 - [x] T9.5 Wrap-up: READMEs updated (protocol table, roadmap, status,
       demo); demo material is the CLI + scripts/e2e.sh +
       docs/ACCEPTANCE.md
+
+## T10 Roster and Presence Subscriptions (RFC 6121 §2, §3)
+
+Goal: the other half of the IM scenario — an address book and authorized
+presence — requested by the hackathon organizing committee.
+
+- [x] T10.1 Roster fetch: `get_roster` sends the `jabber:iq:roster` get,
+      parses items (jid, name, subscription, ask, group) tolerantly toward
+      unknown attributes and children, and caches the result;
+      `Connection::roster()` exposes the cache
+- [x] T10.2 Roster set: `set_roster_item` / `remove_roster_item` send
+      `type='set'` with escaped name and groups, then update the cache
+- [x] T10.3 Roster push: inbound `type='set'` roster iqs are acknowledged
+      with a `result` and applied to the cache before surfacing as
+      `RosterPush` (RFC 6121 §2.1.6); stanzas that arrive while an iq reply
+      is awaited are queued, not dropped
+- [x] T10.4 Presence subscriptions: the four stanzas
+      (`subscribe` / `subscribed` / `unsubscribe` / `unsubscribed`) are sent
+      by `send_subscribe` and its siblings; inbound ones surface as
+      `Subscription` events and are never auto-answered (RFC 6121 §3.1.3)
+- [x] T10.5 CLI and acceptance: `--roster` / `--subscribe` / `--approve`;
+      scripts/roster.sh verifies roster fetch, authorization, and two-way
+      presence broadcasts against prosody + slixmpp (transcripts in
+      docs/acceptance/)
 
 ---
 

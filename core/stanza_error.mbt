@@ -65,9 +65,7 @@ pub extend StanzaError with @moonbitlang/core/debug.Debug::{to_repr}
 
 ///|
 /// Parse the `<error/>` child of a stanza.
-pub fn StanzaError::parse(
-  el : @XMLParser.XMLElement,
-) -> StanzaError raise XmppError {
+pub fn StanzaError::parse(el : @xml.XMLElement) -> StanzaError raise XmppError {
   let error_type = match el.get_attribute("type") {
     Some("auth") => StanzaErrorType::Auth
     Some("cancel") => Cancel
@@ -82,7 +80,7 @@ pub fn StanzaError::parse(
   let mut text : String? = None
   let mut seen = false
   for child in el.get_children() {
-    guard child is @XMLParser.XMLChildren::Element(item) else { continue }
+    guard child is @xml.XMLChildren::Element(item) else { continue }
     if item.name is "text" {
       text = Some(item.get_text())
     } else if !seen {
@@ -94,7 +92,7 @@ pub fn StanzaError::parse(
 }
 
 ///|
-fn stanza_error_condition(el : @XMLParser.XMLElement) -> StanzaErrorCondition {
+fn stanza_error_condition(el : @xml.XMLElement) -> StanzaErrorCondition {
   match el.name {
     "bad-request" => BadRequest
     "conflict" => Conflict

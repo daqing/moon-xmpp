@@ -15,13 +15,33 @@ test "presence renders with type and status" {
   let p : @core.Presence = {
     from: Some(@jid.Jid::parse("alice@example.com")),
     presence_type: Some("unavailable"),
+    show: None,
     status: Some("brb"),
   }
   assert_eq(format_presence(p), "* alice@example.com is unavailable: brb")
   let plain : @core.Presence = {
     from: None,
     presence_type: None,
+    show: None,
     status: None,
   }
   assert_eq(format_presence(plain), "* (unknown) is available")
+}
+
+///|
+test "presence renders the show value instead of available" {
+  let p : @core.Presence = {
+    from: Some(@jid.Jid::parse("bob@example.com/phone")),
+    presence_type: None,
+    show: Some("dnd"),
+    status: Some("Busy"),
+  }
+  assert_eq(format_presence(p), "* bob@example.com/phone is dnd: Busy")
+  let away : @core.Presence = {
+    from: Some(@jid.Jid::parse("bob@example.com/phone")),
+    presence_type: None,
+    show: Some("away"),
+    status: None,
+  }
+  assert_eq(format_presence(away), "* bob@example.com/phone is away")
 }

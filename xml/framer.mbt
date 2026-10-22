@@ -45,9 +45,9 @@ pub struct Framer {
   priv mut closing : Bool
   priv mut name_done : Bool
   priv mut self_closing : Bool
-  priv mut dashes : Int
-  priv mut brackets : Int
-  priv mut question : Int
+  priv mut dashes : Int32
+  priv mut brackets : Int32
+  priv mut question : Int32
   priv mut accumulating : Bool
 }
 
